@@ -1,0 +1,182 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <include
+        android:id="@+id/toolbar"
+        layout="@layout/header_multi_heading" />
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@+id/toolbar"
+        android:layout_margin="@dimen/activity_horizontal_margin">
+
+        <RelativeLayout
+            android:id="@+id/rl_name"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <TextView
+                android:id="@+id/tv_device"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerHorizontal="true"
+                android:padding="@dimen/padding_5dp"
+
+                android:text="@string/device_name"
+                android:textAlignment="center"
+                android:textSize="@dimen/text_size_22sp" />
+
+            <TextView
+                android:id="@+id/tv_device_mac"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/tv_device"
+                android:layout_centerHorizontal="true"
+                android:paddingBottom="@dimen/padding_20dp"
+                android:text="@string/device_name"
+                android:textAlignment="center"
+                android:textSize="@dimen/text_size_16sp" />
+
+        </RelativeLayout>
+
+        <LinearLayout
+            android:id="@+id/rl_file_name"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/button_height_43dp"
+            android:layout_below="@+id/rl_name"
+            android:gravity="center"
+            android:weightSum="1">
+
+            <RelativeLayout
+                android:layout_width="@dimen/layout_widht_0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="0.7">
+
+                <TextView
+                    android:id="@+id/tv_file_name"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="start|center"
+                    android:text="@string/file_name"
+                    android:textSize="@dimen/text_size_16sp" />
+            </RelativeLayout>
+
+            <RelativeLayout
+                android:layout_width="@dimen/layout_widht_0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="0.3">
+
+                <TextView
+                    android:id="@+id/btn_select_file"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/button_effect"
+                    android:padding="@dimen/margin_5dp"
+                    android:text="Select File"
+                    android:textAlignment="center"
+                    android:textColor="@color/white"
+                    android:textSize="@dimen/text_size_16sp" />
+            </RelativeLayout>
+
+
+        </LinearLayout>
+
+        <Spinner
+            android:id="@+id/spinner1"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/rl_file_name"
+            android:visibility="invisible" />
+
+
+        <android.support.v7.widget.CardView xmlns:card_view="http://schemas.android.com/apk/res-auto"
+            android:id="@+id/card_view"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/card_view_height_300dp"
+            android:layout_alignParentBottom="true"
+            android:layout_centerVertical="true"
+            android:layout_gravity="center"
+            android:layout_marginBottom="@dimen/margin_20dp"
+            card_view:cardBackgroundColor="@color/card_bg"
+            card_view:cardCornerRadius="@dimen/corner_radius_4dp">
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+                <TextView
+                    android:id="@+id/info_text"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@color/black"
+                    android:paddingBottom="@dimen/margin_10dp"
+                    android:paddingTop="@dimen/margin_10dp"
+                    android:text="@string/device_firmware"
+                    android:textAlignment="center"
+                    android:textColor="@color/orange"
+                    android:textSize="@dimen/text_size_22sp" />
+
+                <android.support.v7.widget.AppCompatButton
+                    android:id="@+id/btn_upgrade"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@+id/info_text"
+                    android:layout_centerHorizontal="true"
+                    android:layout_marginTop="30dp"
+                    android:background="@drawable/button_effect"
+                    android:paddingBottom="@dimen/margin_5dp"
+                    android:paddingLeft="@dimen/padding_20dp"
+                    android:paddingRight="@dimen/padding_20dp"
+                    android:paddingTop="@dimen/margin_5dp"
+                    android:text="@string/upgrade"
+                    android:textColor="@color/white"
+                    android:textSize="@dimen/text_size_25sp" />
+
+                <TextView
+                    android:id="@+id/btn_uploading"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@+id/btn_upgrade"
+                    android:layout_centerHorizontal="true"
+                    android:layout_marginTop="30dp"
+                    android:padding="@dimen/margin_5dp"
+                    android:text="@string/strCaptionUploading"
+                    android:textColor="@color/text_color"
+                    android:textSize="@dimen/text_size_20sp"
+                    android:visibility="invisible" />
+
+                <ProgressBar
+                    android:id="@+id/determinateBar"
+                    style="@android:style/Widget.Holo.ProgressBar.Horizontal"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@+id/btn_uploading"
+                    android:layout_marginLeft="@dimen/padding_20dp"
+                    android:layout_marginRight="@dimen/padding_20dp"
+                    android:layout_marginTop="@dimen/margin_20dp"
+                    android:progress="100"
+                    android:visibility="invisible" />
+
+                <TextView
+                    android:id="@+id/tv_perc"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@+id/determinateBar"
+                    android:layout_centerHorizontal="true"
+                    android:layout_marginBottom="@dimen/margin_20dp"
+                    android:layout_marginTop="10dp"
+                    android:text="@string/perctg"
+                    android:textColor="@color/text_color"
+                    android:textSize="@dimen/text_size_22sp"
+                    android:visibility="invisible" />
+
+
+            </RelativeLayout>
+        </android.support.v7.widget.CardView>
+    </RelativeLayout>
+
+</RelativeLayout>

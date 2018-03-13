@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <include
+        android:id="@+id/header_layout"
+        layout="@layout/header_multi_heading" />
+
+    <RelativeLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true">
+
+        <android.support.v7.widget.AppCompatButton
+            android:id="@+id/btn_upgrade"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/info_text"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="@dimen/margin_top_30dp"
+            style="@style/TextView_size_20sp"
+            android:background="@drawable/button_effect"
+            android:paddingBottom="@dimen/margin_5dp"
+            android:paddingLeft="@dimen/padding_20dp"
+            android:paddingRight="@dimen/padding_20dp"
+            android:paddingTop="@dimen/margin_5dp"
+            android:text="Upgrade"
+           />
+
+        <android.support.v7.widget.AppCompatButton
+            android:id="@+id/btn_data_logging"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/btn_upgrade"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="@dimen/margin_top_30dp"
+            style="@style/TextView_size_20sp"
+            android:background="@drawable/button_effect"
+            android:paddingBottom="@dimen/margin_5dp"
+            android:paddingLeft="@dimen/padding_20dp"
+            android:paddingRight="@dimen/padding_20dp"
+            android:paddingTop="@dimen/margin_5dp"
+            android:text="Data Logging"
+             />
+        <android.support.v7.widget.AppCompatButton
+            android:id="@+id/btnChangeConfiguration"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/btn_data_logging"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="@dimen/margin_top_30dp"
+            style="@style/TextView_size_20sp"
+            android:background="@drawable/button_effect"
+            android:paddingBottom="@dimen/margin_5dp"
+            android:paddingLeft="@dimen/padding_20dp"
+            android:paddingRight="@dimen/padding_20dp"
+            android:paddingTop="@dimen/margin_5dp"
+            android:text="Change Configuration"
+             />
+    </RelativeLayout>
+
+
+</RelativeLayout>

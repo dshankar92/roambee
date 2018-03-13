@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="colorPrimary">#FDCA07</color>
+    <color name="colorPrimaryDark">#000000</color>
+    <color name="colorAccent">#FFFF6600</color>
+    <color name="white">#ffffff</color>
+    <color name="black">#000000</color>
+    <color name="orange">#FFFF6600</color>
+    <color name="text_color">#545454</color>
+    <color name="card_bg">#FFC2BFBF</color>
+    <color name="yellow">#FFEDB35C</color>
+    <color name="yellow_normal">#FFF16507</color>
+    <color name="yellow_70">#70FFD733</color>
+    <color name="white_six">#f6f6f6</color>
+    <color name="header_text_darkgrey">#575757</color>
+    <color name="dark">#140d18</color>
+    <color name="dark75">#CC140d18</color>
+    <color name="text_grey">#FFC9BFBF</color>
+    <color name="button_blue_color">#007FFF</color>
+    <color name="barney">#8829c1</color>
+    <color name="warm_grey_two_30_opacity">#48717171</color>
+    <color name="azure_opacity_50">#80d5ff</color>
+    <color name="red">#FFFF5555</color>
+    <color name="green_turn_on">#00f000</color>
+</resources>

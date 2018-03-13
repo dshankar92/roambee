@@ -1,0 +1,42 @@
+<android.support.v7.widget.Toolbar xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/toolbar"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@color/black"
+    android:minHeight="?attr/actionBarSize"
+    android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar">
+
+    <TextView
+        android:id="@+id/toolbar_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:text="Scanner"
+        android:textColor="@color/orange"
+        android:textSize="25sp" />
+
+    <RelativeLayout
+        android:id="@+id/ll_refresh"
+        android:layout_width="@dimen/height_70dp"
+        android:layout_height="60dp"
+        android:layout_gravity="right"
+        android:gravity="center"
+        android:padding="@dimen/padding_15dp"
+        android:visibility="visible">
+
+        <ProgressBar
+            android:id="@+id/scan_progress"
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:visibility="visible" />
+
+        <ImageView
+            android:id="@+id/refresh_btn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/refresh"
+            android:visibility="visible" />
+
+    </RelativeLayout>
+
+</android.support.v7.widget.Toolbar>

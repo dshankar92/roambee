@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="channel_array">
+        <item>Enable</item>
+        <item>Disable</item>
+    </string-array>
+    <string-array name="login_interval_array">
+        <item>1 min</item>
+        <item>5 min</item>
+        <item>15 min</item>
+        <item>30 min</item>
+        <item>60 min</item>
+        <item>Disable</item>
+    </string-array>
+    <string-array name="prf_time_out_array">
+        <item>1 sec</item>
+        <item>5 sec</item>
+        <item>10 sec</item>
+        <item>30 sec</item>
+        <item>60 sec</item>
+    </string-array>
+    <string-array name="tx_power_array">
+        <item>0 dBm</item>
+        <item>4 dBm</item>
+        <item>-12 dBm</item>
+    </string-array>
+</resources>

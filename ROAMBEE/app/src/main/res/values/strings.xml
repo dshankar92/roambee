@@ -1,0 +1,238 @@
+<resources>
+    <string name="app_name">Beacon</string>
+    <string name="connect">Connect</string>
+    <string name="gps_network_not_enabled">Enable ocation services</string>
+    <string name="no_ble_supported">Device does not support BLE</string>
+    <string name="network_error">Please check your internet connection.</string>
+    <string name="time_out_error">Time out. Please check your internet connection.</string>
+    <string name="server_error">Server error occurred. Please try again.</string>
+    <string name="Scan">Scan</string>
+    <string name="Connected_Device">Connected Device</string>
+    <string name="Audit_view">Audit View</string>
+    <string name="scan">Scan Screen</string>
+    <string name="download">Check firmware version. Download files.</string>
+    <string name="device_upgrade">Device Upgraded</string>
+    <string name="file_view">File View</string>
+    <string name="device_name">Device Name</string>
+    <string name="file_name">File Name</string>
+    <string name="ABC">ABC</string>
+    <string name="current_version">Current Version</string>
+    <string name="v1">V1.1</string>
+    <string name="updated_version">Upgrade Version</string>
+    <string name="v2">NA</string>
+    <string name="collect_file">Collect File</string>
+    <string name="view">View Screen</string>
+    <string name="delete">Delete</string>
+    <string name="title_activity_view_screen">ViewScreen</string>
+    <string name="user_for">Used For</string>
+    <string name="access_code">Access Code</string>
+    <string name="event_type">Event Type</string>
+    <string name="event_time">Event Time</string>
+    <string name="connected">Connected Screen</string>
+    <string name="audit_folder">Audit Folder Screen</string>
+    <string name="audit_file">Audit File Screen</string>
+    <string name="home">Home Screen</string>
+    <string name="view1">View File </string>
+    <string name="app_version">App Version</string>
+    <string name="about">About</string>
+    <string name="upload">Upload</string>
+    <string name="delete_all">Delete All</string>
+    <string name="upload_all">Upload All</string>
+    <string name="ble_not_supported">BLE not supported</string>
+    <string name="error_bluetooth_not_supported">Error bluetooth not supported</string>
+    <string name="unknown_device">Unknown Device</string>
+    <string name="disconnected">Disconnected</string>
+    <string name="no_data">No data found</string>
+    <string name="unknown_service">unknown_service</string>
+    <string name="unknown_characteristic">unknown_characteristic</string>
+
+    <string name="ok">Okay</string>
+    <string name="toast_download_success">File is successfully download.</string>
+    <string name="toast_download_fail">File is not downloaded.Please try again.</string>
+    <string name="cancel">Cancel</string>
+    <string name="connect_to_device">Do you want to connect to this device?</string>
+    <!--<string name="firmware_file_name">device_firmware_file</string>-->
+    <string name="doorlock_folder">/ble/</string>
+    <string name="roambee_folder">/roamZip/</string>
+    <string name="dev_name_prefix">TKVR</string>
+    <string name="audit_access_code">Access Code</string>
+    <string name="access_type">Access Type</string>
+    <string name="used_for">Used By</string>
+    <string name="Date_time">Date Time</string>
+    <string name="no_dev_found">No device with TKVR prefix found.</string>
+    <string name="make_file">"Make File"</string>
+
+    <string name="not_now">"Not Now"</string>
+
+    <string name="alert_upgrade_firmware">Do you want to upgrade BLE device firmware? It might take some time.</string>
+    <!--<string name="stop_read_exit_app">Do you want to stop Reading file? Exit from app.</string>-->
+    <string name="oad_in_process">Firmware upgrade is in process. Please wait.</string>
+    <string name="dev_upgrade_successful">BLE Device Upgraded Successfully.</string>
+    <string name="stop_oad_exit_app">Do you want to stop firmware upgrade?</string>
+    <string name="connected_succ">Connected successfully.</string>
+    <string name="read_in_process">Read file is in process.Please wait.</string>
+    <string name="reading_process_complete">Reading process is successfully completed.</string>
+    <string name="read">Read File</string>
+    <string name="dev_disconnected">BLE device disconnected. Please connect again.</string>
+    <string name="alert_upgrade_same_firmware">BLE device firmware version is upto date. Do you want to upgrade again? </string>
+    <string name="alert_read_file">Please read file from BLE device.</string>
+    <string name="file_read_complete">File already read.</string>
+    <!--<string name="file_read_successfully">File read successfully.</string>-->
+    <string name="file_already_exist">File already exists.</string>
+    <string name="OAD_file_exists">Updated firmware file already exists.</string>
+    <string name="no_data_to_read">No data to read</string>
+    <string name="firmware_already_updated">Device Firmware already updated.</string>
+    <string name="update_time">Update Device Time</string>
+    <string name="time_updated">Device Time Already Updated.</string>
+    <string name="select_all">Select All</string>
+    <string name="disconnect">Disconnect</string>
+    <string name="update_device_time">Update Device Time</string>
+    <string name="audit_view_file">Audit View File</string>
+    <string name="no_data_for_folder">No folder exists</string>
+    <string name="no_data_for_file">No file exists</string>
+    <string name="no_device_found">No devices found.</string>
+    <string name="exit_app">Do you want to exit from application?</string>
+    <string name="timeout">Connection time out. Please try again</string>
+    <string name="read_file">No data found \nPlease read file.</string>
+    <string name="delete_folder">Do you want to delete folder?</string>
+
+    <string name="checkInternetDownloadFile">"Please check internet connection. Download file for firmware upgrade. "</string>
+    <string name="no_OAD_file">Files do not exits. Please try again.</string>
+
+    <string name="try_again">Please try again.</string>
+    <string name="no_dev_connected">No device is connected.</string>
+    <string name="read_data_first">Please read file.</string>
+    <string name="failur_msg">Upgrade unsuccessful.Please disconnect,try again.</string>
+    <string name="sort_by_name">Sort By Name</string>
+    <string name="sort_by_date">Sort By Date</string>
+
+
+    <string name="cant_connect_server">Can\'t connect to server</string>
+    <string name="success_msg">Firmware Upgrade Successful</string>
+    <string name="disconnection_msg">Device disconnected from bluetooth Please try again.</string>
+    <string name="device_firmware">Device Firmware Upgrade</string>
+    <string name="perctg">99%</string>
+    <string name="conect_first">Device has been disconnected Please connect again.</string>
+    <string name="upgrade_device">Do you want to Upgrade the selected device?</string>
+    <string name="exit_text">Do you want to exit the application?</string>
+    <string name="yes">Yes</string>
+    <string name="not_campatible">This Device is not compatible for upgradation.</string>
+    <string name="connection_fail">Can\'t connect please try again.</string>
+    <string name="connection_fail_pls_refresh">Can\'t connect with the device. Please refresh the screen</string>
+    <!--Showing log texts-->
+    <string name="BLE_Connection_New_State">BLE  Connection New State :</string>
+    <string name="BLE_Connection_State">BLE  Connection State :</string>
+
+
+
+    <string name="mConnectionControl_is_null_during_retry">mConnectionControl is null during retry.</string>
+    <string name="ConnectionError">Connection Error</string>
+    <string name="please_try_again">Please Try Again.</string>
+
+
+    <!--BLE SCANNER ACTIVITY-->
+    <string name="strNoDeviceFoundCaption">No Device Found</string>
+    <string name="strFilterCaption">Filter</string>
+    <string name="strManufactureData"><![CDATA[<font size="15"><b> Manufacture Data:<br> </b></font>]]> </string>
+    <string name="strDiscoveringServicesFailed">Discovering Service Failed. Please Try Again</string>
+
+    <!--CONNECTION CONTROL-->
+    <string name="strReadDenied">Read Denied</string>
+    <string name="strReadingData">Reading Data</string>
+    <string name="strReadFailed">Read Failed</string>
+    <string name="strWriteDenied">Write Denied</string>
+    <string name="strWriteFailed">Write Failed</string>
+    <string name="strFailToFetchData">Fail to fetch Data. Please connect your device and try again.</string>
+    <string name="strDeviceDisconnectedTryAgain">Device has been disconnected. Please connect your device and try again.</string>
+    <string name="strClearCommandFailureMsg">Command failed for Clear Data Operation.</string>
+    <string name="strDFUFailureMsg">Command failed for DFU Operation</string>
+
+    <!--BluetoothService-->
+    <string name="Disconnected_from_GATT_server">Disconnected from GATT server :</string>
+    <string name="Doing_retry">Doing retry.</string>
+    <string name="Doing_retry_record_group">Doing retry for record group/record fetching.</string>
+    <string name="strReadNotPermitted">Read is not Permitted</string>
+    <string name="strReadingFailed">Reading Data Failed</string>
+
+    <!--SELECTION SCREEN ACTIVITY-->
+    <string name="strSelectionScreenCaption">SELECTION SCREEN</string>
+    <string name="strEnteredBootLoaderModeCaption">Entered BootLoader Mode</string>
+    <string name="str_Fail_to_retrieve_config">Fail to Retrieve Configuration</string>
+
+
+    <!--DFU UPGRADE SCREEN ACTIVITY-->
+    <string name="clear_firmware">Do you want to clear device Firmware?</string>
+    <string name="upgrade">"Upgrade"</string>
+    <string name="strPleaseSelectFileForUpgradingCaption">Please select file for upgradation</string>
+    <string name="strOpenFileCaption">Open file</string>
+    <string name="strNoSuitableFileManagerFoundCaption">No suitable File Manager was found.</string>
+    <string name="strSelectFileWithCorrectExtensionCaption">Please select file with correct extension</string>
+    <string name="dfu_service_title">DFu Service</string>
+    <string name="dfu_feature_title">DFU FEATURE</string>
+    <string name="strDFUCaption">DFU</string>
+
+    <!--CHANGE CONFIGURATION ACTIVITY-->
+    <string name="strDisableCaption">Disable</string>
+    <string name="strClearRequestSendSuccessMsg">Clear Data Request Send Successfully</string>
+    <string name="strConfigurationCaption">CONFIGURATION</string>
+    <string name="strDeviceTurnedOffSuccessfullyCaption">Device Turn Off Successfully</string>
+    <string name="strConfigurationChangedSuccessfullyCaption">Configuration Changed Successfully</string>
+    <string name="strCaptionAmbient">Ambient</string>
+    <string name="strCaptionTamper">Tamper</string>
+    <string name="strCaptionDataLoggingTimeInterval">Data logging time interval</string>
+    <string name="strCaptionOnOff">Turn Device Off</string>
+    <string name="strCaptionTimeout">Broadcasting Interval</string>
+    <string name="strCaptionClearData">Clear Data</string>
+    <string name="strEnableCaption">Enable</string>
+
+
+    <!--DATA LOGGING ACTIVITY-->
+    <string name="strDataLoggingCaption">DATA LOGGING</string>
+    <string name="strNoRecordFound">No Record Data Found for Selected Group Index</string>
+    <string name="mStrTotalRecord">Total Record</string>
+    <string name="mStrStorageInterval">Storage Interval</string>
+    <string name="strRetrievingIndexCaption">Retrieving Index</string>
+    <string name="strDataLoggingNotStarted">Data Logging has not started</string>
+    <string name="strInformationCaption">Information</string>
+    <string name="strTotalStoredGroupCaption">Total Stored Group</string>
+    <string name="strDataLoggingStarted">Data Logging has started</string>
+    <string name="strConnectionBrakeMessage">BLE Connection broke with device.\n Click Retry to make connection otherwise click cross button to leave the screen.</string>
+    <string name="stored_group_indexes">STORED GROUP INDEXES</string>
+
+    <!--PROGRESS LOADER TEXT-->
+    <string name="dev_upgrading">Upgrading BLE Device&#8230;</string>
+    <string name="strCaptionUploading">Uploading&#8230;</string>
+    <string name="strDFUStartedCaption">DFU Started&#8230;</string>
+    <string name="strChangingConfigurationLoading">Changing Configuration&#8230;</string>
+    <string name="strRetrievingConfiguration">Retrieving Configuration&#8230;</string>
+    <string name="please_wait">Please wait&#8230;</string>
+    <string name="fetching">Fetching&#8230;</string>
+    <string name="downloading_firmware_files">Downloading Firmware Files&#8230;</string>
+    <string name="download_again">Files do not exits. Downloading again&#8230;</string>
+    <string name="scan_devices">Scanning devices&#8230;</string>
+    <string name="strCaptionConnecting">Connecting&#8230;</string>
+
+    <!--PROGRESS DIALOG TEXT-->
+    <string name="strWarningCaption">WARNING</string>
+    <string name="strRetryCaption">RETRY</string>
+    <string name="strCaptionOK">OK</string>
+
+    <!--NORMAL TEXT-->
+    <string name="strSuccessCaption">Success</string>
+    <string name="strUpdateCaption">Update</string>
+    <string name="strSerialNumberCaption">Sr. No</string>
+    <string name="strDateCaption">Date</string>
+    <string name="strTimeCaption">Time</string>
+    <string name="strTemperatureCaption">Temp (°C)</string>
+    <string name="strLightCaption">Light \n(%)</string>
+    <string name="strTamperCaption">Tamper \n(0/1)</string>
+    <string name="strBatteryCaption">Battery \n(week)</string>
+    <string name="strHumidityCaption">Humidity</string>
+    <string name="strPressureCaption">Pressure \n(Pa)</string>
+    <string name="strTimestamp">TimeStamp</string>
+    <string name="strTempCaption">Temperature</string>
+    <string name="strBatteryLifeCaption">Battery Life</string>
+    <string name="strLightIntensityCaption">Light Intensity</string>
+
+
+</resources>
