@@ -29,7 +29,7 @@
                 android:layout_width="@dimen/image_view_width__height_20dp"
                 android:layout_height="@dimen/image_view_width__height_20dp"
                 android:layout_centerVertical="true"
-                android:src="@drawable/bluetoth" />
+                android:src="@drawable/bluetooth" />
 
             <RelativeLayout
 
@@ -66,6 +66,9 @@
                 android:layout_height="wrap_content"
                 android:layout_alignParentEnd="true"
                 android:layout_centerVertical="true"
+                android:clickable="true"
+                android:focusable="true"
+                android:foreground="?android:attr/selectableItemBackground"
                 android:layout_marginEnd="@dimen/margin_15dp"
                 android:background="@color/black">
 

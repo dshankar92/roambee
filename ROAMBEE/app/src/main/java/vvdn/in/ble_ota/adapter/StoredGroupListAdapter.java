@@ -153,7 +153,8 @@ public class StoredGroupListAdapter extends BaseAdapter {
                      *  GlobalConstant.TOTAL_STORED_RECORDS_ON_DEVICE
                      *  GlobalConstant.longGroupIndexTimeStamp
                      */
-                    AndroidAppUtils.showLog(TAG, " GlobalConstant.TOTAL_STORED_RECORDS_ON_DEVICE : " + GlobalConstant.TOTAL_STORED_RECORDS_ON_DEVICE +
+                    AndroidAppUtils.showLog(TAG, "groupIndexModel.getStrGroupIndex() : " + groupIndexModel.getStrGroupIndex() +
+                            "\n GlobalConstant.TOTAL_STORED_RECORDS_ON_DEVICE : " + GlobalConstant.TOTAL_STORED_RECORDS_ON_DEVICE +
                             "\n GlobalConstant.longGroupIndexTimeStamp : " + AndroidAppUtils.getDate(GlobalConstant.longGroupIndexTimeStamp));
                     //Current Record Index and Current  Record Time Stamp
                     /**
@@ -164,7 +165,10 @@ public class StoredGroupListAdapter extends BaseAdapter {
                     int intCurrentCount = Integer.parseInt(groupIndexModel.getStrCurrentCounter());
                     int intCurrentRecordEndTime = GlobalConstant.TOTAL_STORED_RECORDS_ON_DEVICE - intCurrentCount;
                     long intCurrentEnd = intCurrentRecordEndTime * intStorageInterval;//intCurrentRecordEndTime * 1;
-                    AndroidAppUtils.showLog(TAG, "intCurrentRecordEndTime : " +
+                    AndroidAppUtils.showLog(TAG, "intCurrentCount : " + intCurrentCount +
+                            "\nintCurrentRecordEndTime : " +
+                            intCurrentRecordEndTime +
+                            "\nintCurrentEnd : " + intCurrentEnd + "\nintCurrentRecordEndTime : " +
                             AndroidAppUtils.getDate(AndroidAppUtils.calculateTimeStamp(GlobalConstant.longGroupIndexTimeStamp,
                                     intCurrentEnd + "")));
                     long longCurrentRecordEndTime = AndroidAppUtils.calculateTimeStamp(GlobalConstant.longGroupIndexTimeStamp,

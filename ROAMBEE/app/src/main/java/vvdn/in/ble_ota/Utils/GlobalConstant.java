@@ -4,7 +4,7 @@ import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothGattCharacteristic;
 
-import java.util.ArrayList;
+import java.util.List;
 
 import no.nordicsemi.android.log.LogSession;
 import vvdn.in.ble_ota.listener.BluetoothConnectionStateInterface;
@@ -43,6 +43,10 @@ public class GlobalConstant {
      * Remote device has forced a disconnect.
      */
     public static final int STATUS_CODE_19 = 19;
+    /**
+     * BLE_HCI_REMOTE_DEV_TERMINATION_DUE_TO_LOW_RESOURCES
+     */
+    public static final int STATUS_CODE_14 = 14;
     public static final String KEY_UPDATE_UI = "key_update_ui";
     public static final String KEY_DATA_TO_UI = "key_data_to_ui";
     public static final String KEY_NAME = "name";
@@ -77,11 +81,12 @@ public class GlobalConstant {
             "com.example.bluetooth.le.EXTRA_DATA";
 
     public static BluetoothGattCharacteristic Notification_Characteristics_UUID;
+    public static MyCountDownTimer myCountDownTimer;
     public static boolean boolIsDataLoggingActivityVisible = false;
 
     /*STORED FIRST INDEX ON DEVICE*/
 
-    public static int STORED_FIRST_INDEX = 0x05;
+    public static int STORED_FIRST_INDEX = 0x04;
     public static String DEVICE_CONNECTING_NAME = "";
     public static int TOTAL_STORED_RECORDS_ON_DEVICE = 0;
     public static int INT_CURRENT_GROUP_INDEX = 0;
@@ -89,11 +94,12 @@ public class GlobalConstant {
     public static long longGroupIndexTimeStamp = 0L;
     public static int ONE_SECOND_DELAY_DURATION = 1000;
     public static String RECORD_NEED_TO_BE_RECEIVE = "0";
-    public static ArrayList<Activity> mGlobalActivityArrayList;
+    public static List<Activity> mGlobalActivityArrayList;
     public static String ACTION_PERFORMED = "";
     public static boolean IS_NEED_TO_SHOW_DISCONNECT_MESSAGE = true;
     public static int TOTAL_RECORD_FOR_CURRENT_GROUP_SELECTED = 0;
     public static boolean IS_DFU_OPERATION_STILL_IN_PROCESS = false;
+    public static int CURRENT_ROLL_BACK_INDEX=0x00;
     /**
      * Constant for handling the fail/disconnect packet information like
      * group index and record index
@@ -133,6 +139,11 @@ public class GlobalConstant {
      * String for managing the data according to type of beacon connected
      */
     public static String STRING_CURRENT_BEACON_TYPE_CONNECTED = "string_current_beacon_type_connected";
+
+    //    To ensure unique popup on the screen
+    public static boolean BOOL_IS_CONNECT_BUTTON_CLICKED = false;
+
+    public static boolean BOOL_IS_SERVICES_DISCOVERED = false;
 
 
 

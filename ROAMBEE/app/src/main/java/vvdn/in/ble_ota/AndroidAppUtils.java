@@ -777,7 +777,7 @@ public class AndroidAppUtils {
                 snackBarActionButtonListener.onClickOfSnackBarActionButtonView();
             }
         });
-        snackbar.setDuration(3000);
+        snackbar.setDuration(4000);
         snackbar.show();
     }
 
@@ -1251,5 +1251,16 @@ public class AndroidAppUtils {
             }
         }
         return (hits == 0);
+    }
+
+    /**
+     * Method Name : dismissGradientDialog
+     * Description : This method is used for dismissing the gradient dialog
+     */
+    public static void dismissGradientDialog() {
+        if (gradiantDialog != null) {
+            gradiantDialog.dismiss();
+            gradiantDialog = null;
+        }
     }
 }

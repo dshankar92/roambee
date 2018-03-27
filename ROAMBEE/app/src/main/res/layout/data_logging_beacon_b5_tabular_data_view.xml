@@ -193,12 +193,12 @@
             android:layout_weight=".6">
 
             <TextView
-                android:id="@+id/mTvHumidity"
+                android:id="@+id/mTvShock"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:layout_centerInParent="true"
                 android:gravity="center"
-                android:text="@string/strHumidityCaption"
+                android:text="@string/strShockCaption"
                 android:textAlignment="center"
                 android:textSize="@dimen/text_size_12sp"
                 android:textStyle="bold" />
@@ -215,12 +215,12 @@
             android:layout_weight=".6">
 
             <TextView
-                android:id="@+id/mTvPressure"
+                android:id="@+id/mTvTiltAngel"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:layout_centerInParent="true"
                 android:gravity="center"
-                android:text="@string/strPressureCaption"
+                android:text="@string/strTiltAngelCaption"
                 android:textAlignment="center"
                 android:textSize="@dimen/text_size_12sp"
                 android:textStyle="bold" />

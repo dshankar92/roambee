@@ -3,18 +3,29 @@ package vvdn.in.ble_ota.view;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.bluetooth.BluetoothDevice;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.support.annotation.RequiresApi;
+import android.text.TextUtils;
+import android.view.KeyEvent;
 import android.view.View;
+import android.view.inputmethod.EditorInfo;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.Spinner;
+import android.widget.TextView;
+
+import java.nio.charset.StandardCharsets;
 
 import vvdn.in.ble_ota.AndroidAppUtils;
 import vvdn.in.ble_ota.AppHelper;
 import vvdn.in.ble_ota.R;
 import vvdn.in.ble_ota.Utils.GlobalConstant;
+import vvdn.in.ble_ota.Utils.GlobalKeys;
+import vvdn.in.ble_ota.Utils.MyCountDownTimer;
 import vvdn.in.ble_ota.adapter.DeviceAdapter;
 import vvdn.in.ble_ota.application.AppApplication;
 import vvdn.in.ble_ota.blecontrols.BluetoothLeService;
@@ -24,6 +35,7 @@ import vvdn.in.ble_ota.listener.BluetoothConnectionStateInterface;
 import vvdn.in.ble_ota.listener.ChoiceDialogClickListener;
 import vvdn.in.ble_ota.listener.DataLoggingListener;
 import vvdn.in.ble_ota.listener.HeaderViewClickListener;
+import vvdn.in.ble_ota.listener.SnackBarActionButtonListener;
 import vvdn.in.ble_ota.model.GroupConfigurationModel;
 
 /**
@@ -37,22 +49,25 @@ public class ChangeConfigurationActivity extends Activity implements View.OnClic
     /**
      * EditText reference object
      */
-    private EditText mAls_EditText, mTamper_EditText;
+    private EditText mAls_EditText, mTamper_EditText, mPharmaModeDelayValue_EditText, mUserNoteEdittext;
     /**
      * Spinner reference object
      */
     private Spinner mChannel_37_Spinner, mChannel_38_Spinner, mChannel_39_Spinner;
     private Spinner mLogin_Interval_Spinner, mPrf_timeout_spinner,
-            mTx_power_spinner;
-    private String mPrfTimeOutArray[], mChannel37SpinnerArray[], mChannel38SpinnerArray[], mChannel39SpinnerArray[], mDataLoggingArray[], mTxPowerArray[];
+            mTx_power_spinner, mPharmaModeSpinner;
+    private String mPrfTimeOutArray[], mChannel37SpinnerArray[], mChannel38SpinnerArray[],
+            mChannel39SpinnerArray[], mDataLoggingArray[], mTxPowerArray[], mPharmaModeSpinnerArray[];
     /**
      * String reference object
      */
-    private String channel_37_Int = "", channel_38_Int = "", channel_39_Int = "", mLogin_Interval_Int = "", mTxPowerInt = "", mPrfTimeOut = "", mAls_String = "", mTamper_String = "";
+    private String channel_37_Int = "", channel_38_Int = "", channel_39_Int = "",
+            mLogin_Interval_Int = "", mTxPowerInt = "", mPrfTimeOut = "", mAls_String = "",
+            mTamper_String = "", mPharmaModeDelay_String = "", mPharmaMode_String;
     /**
      * Button reference object
      */
-    private Button mCancel_Button, mSend_Button, btnClearData;
+    private Button mCancel_Button, mSend_Button, btnClearData, btnResetDevice, btnSave;
     /**
      * Byte data that needs to be written on failure
      */
@@ -72,11 +87,16 @@ public class ChangeConfigurationActivity extends Activity implements View.OnClic
     /**
      * String reference object
      */
-    private String strTurnOff = "02";
+    private String strTurnOff = AppHelper.ZERO_TWO;
     /**
      * Boolean reference object for handling the on/off of power button
      */
-    private boolean boolISTurnedOff = true, boolIsClearDataCommandSend = false;
+    private boolean boolISTurnedOff = true, boolIsClearDataCommandSend = false, boolIsResetDeviceCommandSend = false,
+            boolIsUserNoteSend = false, boolIsUserNoteSendRequestGenerated = false, boolIsUserNoteRetrieveCommandSend = false;
+    /**
+     * LinearLayout reference object
+     */
+    private LinearLayout lLPharmaModeLayout;
 
 
     @Override
@@ -102,7 +122,9 @@ public class ChangeConfigurationActivity extends Activity implements View.OnClic
                     "\n  groupConfigurationModel.getStrChannel37() : " + groupConfigurationModel.getStrChannel37() +
                     " \ngroupConfigurationModel.getStrChannel38() : " + groupConfigurationModel.getStrChannel38() +
                     "\n  groupConfigurationModel.getStrChannel39() : " + groupConfigurationModel.getStrChannel39() +
-                    "\n  groupConfigurationModel.getStrTamper() : " + groupConfigurationModel.getStrTamper()
+                    "\n  groupConfigurationModel.getStrTamper() : " + groupConfigurationModel.getStrTamper() +
+                    "\n groupConfigurationModel.getStrPharmaModeValue() : " + groupConfigurationModel.getStrPharmaModeValue() +
+                    "\n  groupConfigurationModel.getStrPharmaModeDelay() : " + groupConfigurationModel.getStrPharmaModeDelay()
             );
             AndroidAppUtils.showErrorLog(TAG, "fetchPositionValue(mDataLoggingArray, checkStatusOfChannelArray(groupConfigurationModel.getStrDataLoggingInterval(), false), false) : " +
                     checkStatusOfChannelArray(groupConfigurationModel.getStrDataLoggingInterval(), false));
@@ -113,6 +135,8 @@ public class ChangeConfigurationActivity extends Activity implements View.OnClic
             mChannel_38_Spinner.setSelection(fetchPositionValue(mChannel38SpinnerArray, checkStatusOfChannelArray(groupConfigurationModel.getStrChannel38(), true), true));
             mChannel_39_Spinner.setSelection(fetchPositionValue(mChannel39SpinnerArray, checkStatusOfChannelArray(groupConfigurationModel.getStrChannel39(), true), true));
             mTamper_EditText.setText(groupConfigurationModel.getStrTamper());
+            mPharmaModeSpinner.setSelection(fetchPositionValue(mPharmaModeSpinnerArray, checkStatusOfPharmaModeArray(groupConfigurationModel.getStrPharmaModeValue(), true), true));
+            mPharmaModeDelayValue_EditText.setText(groupConfigurationModel.getStrPharmaModeDelay());
         } else {
             AndroidAppUtils.showInfoLog(TAG, " Data cannot be fetched");
         }
@@ -124,6 +148,7 @@ public class ChangeConfigurationActivity extends Activity implements View.OnClic
         if (mActivity != null) {
             AppApplication.getInstance().setCurrentActivityReference(mActivity);
         }
+        retrieveUserCommentForDevice();
         setUpListener();
         manageBluetoothConnectionSetupListener();
 
@@ -144,6 +169,32 @@ public class ChangeConfigurationActivity extends Activity implements View.OnClic
                 strResultStatus = mActivity.getResources().getString(R.string.strEnableCaption);
             } else {
                 strResultStatus = mActivity.getResources().getString(R.string.strDisableCaption);
+            }
+        } else {
+            if (strStatus.equalsIgnoreCase(AppHelper.NUMBER_ZERO)) {
+                strResultStatus = mActivity.getResources().getString(R.string.strDisableCaption);
+            } else {
+                strResultStatus = strStatus;
+            }
+        }
+        return strResultStatus;
+    }
+
+    /**
+     * Method Name : checkStatusOfPharmaModeArray
+     * Description : This method is used for checking the status of pharma mode
+     * array and return the status in readable format
+     *
+     * @param strStatus
+     * @return
+     */
+    public String checkStatusOfPharmaModeArray(String strStatus, boolean boolIsPharmaModeArray) {
+        String strResultStatus = "";
+        if (boolIsPharmaModeArray) {
+            if (strStatus.equalsIgnoreCase(AppHelper.NUMBER_ZERO)) {
+                strResultStatus = mActivity.getResources().getString(R.string.strDisableCaption);
+            } else {
+                strResultStatus = mActivity.getResources().getString(R.string.strEnableCaption);
             }
         } else {
             if (strStatus.equalsIgnoreCase(AppHelper.NUMBER_ZERO)) {
@@ -193,9 +244,31 @@ public class ChangeConfigurationActivity extends Activity implements View.OnClic
      */
     private void setUpListener() {
         mDataLoggingListener = new DataLoggingListener() {
+            @RequiresApi(api = Build.VERSION_CODES.KITKAT)
             @Override
             public void OnNotificationReceived(byte[] byteData) {
+                byte[] byteDataReceived = new byte[byteData.length];
+                AndroidAppUtils.showInfoLog(TAG, "byteData : " + byteData +
+                        "\n converted string data : " + AndroidAppUtils.convertToHexString(byteDataReceived));
 
+                if (!AndroidAppUtils.byteArrayCheckZero(byteData) && byteData.length > 19 && boolIsUserNoteRetrieveCommandSend) {
+
+                    System.arraycopy(byteData, 0, byteDataReceived, 0, byteData.length);
+                    try {
+                        String normalString = new String(byteDataReceived, StandardCharsets.UTF_8);
+                        AndroidAppUtils.showInfoLog(TAG,
+                                " normalString : " + AndroidAppUtils.removeTrailingZeros(
+                                        normalString));
+                        normalString = !normalString.isEmpty() ? normalString.replaceAll("[^a-zA-Z0-9 ]", "") : "";
+                        if (boolIsUserNoteRetrieveCommandSend) {
+                            mUserNoteEdittext.setText(normalString);
+                            boolIsUserNoteRetrieveCommandSend = false;
+                            enableDisableNotification(false);
+                        }
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
             }
 
             @Override
@@ -203,14 +276,79 @@ public class ChangeConfigurationActivity extends Activity implements View.OnClic
                 if (boolIsClearDataCommandSend) {
                     AndroidAppUtils.showSnackBar(AppApplication.getInstance(), mActivity.getResources().getString(R.string.strClearRequestSendSuccessMsg));
                     boolIsClearDataCommandSend = false;
+                } else if (boolIsResetDeviceCommandSend) {
+                    showMessageAccordingToOperation(strTurnOff);
+                    GlobalConstant.BOOL_IS_NEED_TO_RETRIEVE_DATA = true;
+                    boolIsResetDeviceCommandSend = false;
+                } else if (boolIsUserNoteSendRequestGenerated) {
+                    sendCommandForSavingUserNote(AppHelper.STRING_SEND_USER_DATA_TRANSFER);
+                    boolIsUserNoteSendRequestGenerated = false;
+                } else if (boolIsUserNoteSend) {
+                    AndroidAppUtils.showSnackBar(AppApplication.getInstance(), mActivity.getResources().getString(R.string.strUserNoteSaveSuccessMsg));
+                    boolIsUserNoteSend = false;
+                } else if (boolIsUserNoteRetrieveCommandSend) {
+                    enableDisableNotification(true);
                 } else {
                     showMessageAccordingToOperation(strTurnOff);
+                    GlobalConstant.BOOL_IS_NEED_TO_RETRIEVE_DATA = true;
                 }
-                GlobalConstant.BOOL_IS_NEED_TO_RETRIEVE_DATA = true;
                 AndroidAppUtils.hideProgressDialog();
             }
 
         };
+    }
+
+    /**
+     * Method Name : RemoveNonAlphaNumeric
+     * Description : This method is used for removing non alpha numeric character from string
+     *
+     * @param value
+     * @return
+     */
+    public String RemoveNonAlphaNumeric(String value) {
+        StringBuilder sb = new StringBuilder(value);
+        for (int i = 0; i < value.length(); i++) {
+            char ch[] = value.toCharArray();
+
+            if (Character.isLetterOrDigit(ch[i])) {
+                sb.append(ch);
+            }
+        }
+        return sb.toString();
+    }
+
+    /**
+     * Method Name : enableDisableNotification
+     * Description : this method is used for enabling/disabling the notification on data logging
+     * characteristics
+     *
+     * @param enableDisableStatus
+     */
+    private void enableDisableNotification(boolean enableDisableStatus) {
+        if (enableDisableStatus) {
+            DeviceAdapter.mConnectionControl.enableNotification(ConnectionControl.dl_notification_characteristics);
+        } else {
+            DeviceAdapter.mConnectionControl.disableNotification(ConnectionControl.dl_notification_characteristics);
+        }
+    }
+
+    /**
+     * Method Name : retrieveUserCommentForDevice
+     * Description : This method is used for retrieving the configuration from the device
+     */
+    private void retrieveUserCommentForDevice() {
+        AndroidAppUtils.showProgressDialog(mActivity, mActivity.getResources().getString(R.string.strRetrieveUserNote), false);
+        final byte sendReadingToken[] = {(byte) 0x00, (byte) 0x02, (byte) 0x00, (byte) 0x03};
+
+        new Handler(Looper.getMainLooper()).postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                GlobalConstant.myCountDownTimer.stringGeneratedForActionOccurred(mActivity.getResources().getString(R.string.strFailToRetrieveMag));
+                boolIsUserNoteRetrieveCommandSend = true;
+                if (ConnectionControl.dl_write_characteristics != null)
+                    DeviceAdapter.mConnectionControl.writeToDevice(ConnectionControl.dl_write_characteristics, sendReadingToken);
+            }
+        }, 2000);
     }
 
     /**
@@ -228,6 +366,8 @@ public class ChangeConfigurationActivity extends Activity implements View.OnClic
         groupConfigurationModel.setStrChannel39(channel_39_Int);
         groupConfigurationModel.setStrDataLoggingInterval(mLogin_Interval_Int);
         groupConfigurationModel.setStrTamper(mTamper_String);
+        groupConfigurationModel.setStrPharmaModeDelay(mPharmaModeDelay_String);
+        groupConfigurationModel.setStrPharmaModeValue(mPharmaMode_String);
         AppApplication.getInstance().saveConfigurationData(GlobalConstant.DEVICE_MAC, groupConfigurationModel);
         AndroidAppUtils.hideProgressDialog();
     }
@@ -348,6 +488,9 @@ public class ChangeConfigurationActivity extends Activity implements View.OnClic
         HeaderViewClickListener headerViewClickListener = new HeaderViewClickListener() {
             @Override
             public void onClickOfHeaderLeftView() {
+                if (mDataLoggingListener != null) {
+                    mDataLoggingListener = null;
+                }
                 onBackPressed();
             }
 
@@ -357,7 +500,7 @@ public class ChangeConfigurationActivity extends Activity implements View.OnClic
                  * Turned On Condition
                  */
                 if (!boolISTurnedOff) {
-                    strTurnOff = "02";
+                    strTurnOff = AppHelper.ZERO_TWO;
                     GlobalConstant.BOOL_IS_TURN_OFF_COMMAND_SEND = false;
                     HeaderViewManager.getInstance().changeRightImageViewColor(mActivity.getResources().getColor(R.color.green_turn_on));
                     boolISTurnedOff = true;
@@ -366,7 +509,7 @@ public class ChangeConfigurationActivity extends Activity implements View.OnClic
                  * Turned off condition
                  */
                 else {
-                    strTurnOff = "01";
+                    strTurnOff = AppHelper.ZERO_ONE;
                     GlobalConstant.BOOL_IS_TURN_OFF_COMMAND_SEND = true;
                     HeaderViewManager.getInstance().changeRightImageViewColor(mActivity.getResources().getColor(R.color.red));
                     boolISTurnedOff = false;
@@ -384,24 +527,27 @@ public class ChangeConfigurationActivity extends Activity implements View.OnClic
     private void sendChangeConfigurationDataToDevice() {
         mAls_String = mAls_EditText.getText().toString().trim().replaceAll("[^\\d.]", "");
         mTamper_String = mTamper_EditText.getText().toString().trim().replaceAll("[^\\d.]", "");
+        mPharmaModeDelay_String = mPharmaModeDelayValue_EditText.getText().toString().trim().replaceAll("[^\\d.]", "");
         AndroidAppUtils.showLog(TAG, "(mChannel_37_Spinner.getSelectedItem() : " + mChannel_37_Spinner.getItemAtPosition(mChannel_37_Spinner.getSelectedItemPosition()) +
                 "\nmChannel_38_Spinner.getSelectedItem() " + mChannel_38_Spinner.getItemAtPosition(mChannel_38_Spinner.getSelectedItemPosition()) +
-                "\nmChannel_39_Spinner.getSelectedItem() : " + mChannel_39_Spinner.getItemAtPosition(mChannel_39_Spinner.getSelectedItemPosition()));
+                "\nmChannel_39_Spinner.getSelectedItem() : " + mChannel_39_Spinner.getItemAtPosition(mChannel_39_Spinner.getSelectedItemPosition()) +
+                "\n mPharmaModeDelay_String : " + mPharmaModeDelay_String);
         channel_37_Int = spinnerValueChange(mChannel_37_Spinner.getItemAtPosition(mChannel_37_Spinner.getSelectedItemPosition()).toString().trim());
         channel_38_Int = spinnerValueChange(mChannel_38_Spinner.getItemAtPosition(mChannel_38_Spinner.getSelectedItemPosition()).toString().trim());
         channel_39_Int = spinnerValueChange(mChannel_39_Spinner.getItemAtPosition(mChannel_39_Spinner.getSelectedItemPosition()).toString().trim());
+        mPharmaMode_String = spinnerPharmaModeValueChange(mPharmaModeSpinner.getItemAtPosition(mPharmaModeSpinner.getSelectedItemPosition()).toString().trim());
         if (mLogin_Interval_Spinner.getSelectedItem().toString().trim().equalsIgnoreCase(mActivity.getResources().getString(R.string.strDisableCaption))) {
-            mLogin_Interval_Int = "0";
+            mLogin_Interval_Int = AppHelper.NUMBER_ZERO;
         } else {
             mLogin_Interval_Int = mLogin_Interval_Spinner.getSelectedItem().toString().trim().replaceAll("[^\\d.]", "");
         }
         mTxPowerInt = mTx_power_spinner.getSelectedItem().toString().trim().replaceAll("[^\\d.]", "");
         mPrfTimeOut = mPrf_timeout_spinner.getSelectedItem().toString().trim().replaceAll("[^\\d.]", "");
-
+        byte[] mBytePharmaModeValue = verifyPharmaModeDelayData(AndroidAppUtils.convertInHex(mPharmaModeDelay_String.isEmpty() ? AppHelper.NUMBER_ZERO : mPharmaModeDelay_String));
         String mData = mPrfTimeOut + mTxPowerInt +
                /* mAls_String + */mTamper_String +
                 channel_37_Int + channel_38_Int
-                + channel_39_Int + mLogin_Interval_Int;
+                + channel_39_Int + mLogin_Interval_Int + mPharmaMode_String;
         /**
          * Given arbitrary file id and record id for turning off the device
          */
@@ -410,8 +556,8 @@ public class ChangeConfigurationActivity extends Activity implements View.OnClic
         byte[] etByteFileID = AndroidAppUtils.verifyForMoreThanTwoDigit(strFileId.isEmpty() ? AppHelper.DOUBLE_ZERO + AppHelper.ZERO_FIVE : AndroidAppUtils.appendNoOfZeroIfRequired(strFileId));
         byte[] etByteRecordID = AndroidAppUtils.verifyForMoreThanTwoDigit(strRecordId.isEmpty() ? AppHelper.DOUBLE_ZERO + AppHelper.ZERO_ONE : AndroidAppUtils.appendNoOfZeroIfRequired(strRecordId));
 
-        byte[] dataToWritten = {(byte) (Integer.parseInt(mPrfTimeOut.isEmpty() ? "0a" : AndroidAppUtils.appendNoOfZeroIfRequired(mPrfTimeOut)) & 0xFF),
-                (byte) (Integer.parseInt(mTxPowerInt.isEmpty() ? AppHelper.ZERO_FOUR : AndroidAppUtils.appendNoOfZeroIfRequired(mTxPowerInt)) & 0xFF),
+        byte[] dataToWritten = {(byte) 0x00,
+                (byte) 0x00,
 //                (byte) (Integer.parseInt(mAls_String.isEmpty() ? "20" : AndroidAppUtils.appendNoOfZeroIfRequired(mAls_String)) & 0xFF),
                 (byte) (Integer.parseInt(mTamper_String.isEmpty() ? "20" : AndroidAppUtils.appendNoOfZeroIfRequired(mTamper_String)) & 0xFF),
                 (byte) (Integer.parseInt(channel_37_Int.isEmpty() ? AppHelper.DOUBLE_ZERO : AndroidAppUtils.appendNoOfZeroIfRequired(channel_37_Int)) & 0xFF),
@@ -422,7 +568,12 @@ public class ChangeConfigurationActivity extends Activity implements View.OnClic
                 etByteRecordID[0],
                 etByteRecordID[1],
                 (byte) (Integer.parseInt(mLogin_Interval_Int.isEmpty() ? "15" : AndroidAppUtils.appendNoOfZeroIfRequired(mLogin_Interval_Int)) & 0xFF),
-                (byte) (Integer.parseInt(strTurnOff.isEmpty() ? AppHelper.ZERO_TWO : AndroidAppUtils.appendNoOfZeroIfRequired(strTurnOff)) & 0xFF)
+                (byte) (Integer.parseInt(strTurnOff.isEmpty() ? AppHelper.ZERO_TWO : AndroidAppUtils.appendNoOfZeroIfRequired(strTurnOff)) & 0xFF),
+                mBytePharmaModeValue[0],
+                mBytePharmaModeValue[1],
+                (byte) (Integer.parseInt(mPharmaMode_String.isEmpty() ? AppHelper.DOUBLE_ZERO : AndroidAppUtils.appendNoOfZeroIfRequired(mPharmaMode_String)) & 0xFF),
+                (byte) (Integer.parseInt(mPrfTimeOut.isEmpty() ? "0a" : AndroidAppUtils.appendNoOfZeroIfRequired(mPrfTimeOut)) & 0xFF),
+                (byte) (Integer.parseInt(mTxPowerInt.isEmpty() ? AppHelper.ZERO_FOUR : AndroidAppUtils.appendNoOfZeroIfRequired(mTxPowerInt)) & 0xFF)
         };
         mByteDataNeedToWritten = dataToWritten;
         AndroidAppUtils.showLog(TAG, "DATA ENTERED : " + mData + "   ****** dataToWritten : " + dataToWritten +
@@ -431,9 +582,11 @@ public class ChangeConfigurationActivity extends Activity implements View.OnClic
         GlobalConstant.IS_NEED_TO_SHOW_DISCONNECT_MESSAGE = false;
         if (GlobalConstant.CONNECTED_STATE) {
             AndroidAppUtils.showProgressDialog(mActivity, mActivity.getResources().getString(R.string.strChangingConfigurationLoading), false);
-            if (ConnectionControl.dl_write_characteristics != null)
+            if (ConnectionControl.dl_write_characteristics != null) {
+                boolIsUserNoteRetrieveCommandSend = false;
+
                 DeviceAdapter.mConnectionControl.writeFirstByteToDevice(ConnectionControl.dl_write_characteristics, dataToWritten, mActivity);
-            else {
+            } else {
                 AndroidAppUtils.showErrorLog(TAG, "ConnectionControl.dl_write_characteristics is null");
             }
         } else {
@@ -447,6 +600,31 @@ public class ChangeConfigurationActivity extends Activity implements View.OnClic
     }
 
     /**
+     * Method Name : verifyPharmaModeDelayData
+     * Description : This method is used for verifying the delay data
+     *
+     * @param mPharmaModeDelay_string
+     * @return
+     */
+    private byte[] verifyPharmaModeDelayData(String mPharmaModeDelay_string) {
+        byte[] bytePharmaModeDelayValue = new byte[2];
+        if (!TextUtils.isEmpty(mPharmaModeDelay_string)) {
+            int intPharmaModeDelayValueLength = mPharmaModeDelay_string.length();
+            int intPharmaModeDelayValue = mPharmaModeDelay_string.length();
+            if (intPharmaModeDelayValue >= 1 && intPharmaModeDelayValue <= 1440) {
+                if (intPharmaModeDelayValueLength <= 2) {
+                    bytePharmaModeDelayValue = AndroidAppUtils.verifyForMoreThanTwoDigit(AndroidAppUtils.appendNoOfZeroIfRequired(mPharmaModeDelay_string));
+                } else if (intPharmaModeDelayValueLength > 2 && intPharmaModeDelayValueLength <= 4) {
+                    bytePharmaModeDelayValue = AndroidAppUtils.verifyForMoreThanTwoDigit(AndroidAppUtils.appendNoOfZeroIfRequired(mPharmaModeDelay_string));
+                }
+            } else {
+                AndroidAppUtils.showWarningLog(TAG, " Invalid Input");
+            }
+        }
+        return bytePharmaModeDelayValue;
+    }
+
+    /**
      * Method Name : spinnerValueChange
      * Description : This method is used for fetching value based on selection done in spinner
      *
@@ -454,6 +632,20 @@ public class ChangeConfigurationActivity extends Activity implements View.OnClic
      * @return
      */
     private String spinnerValueChange(String value) {
+        if (value.equalsIgnoreCase(mActivity.getResources().getString(R.string.strDisableCaption)))
+            return AppHelper.NUMBER_ONE;
+        else
+            return AppHelper.NUMBER_ZERO;
+    }
+
+    /**
+     * Method Name : spinnerPharmaModeValueChange
+     * Description : This method is used for fetching value based on selection done in spinner
+     *
+     * @param value
+     * @return
+     */
+    private String spinnerPharmaModeValueChange(String value) {
         if (value.equalsIgnoreCase(mActivity.getResources().getString(R.string.strDisableCaption)))
             return AppHelper.NUMBER_ZERO;
         else
@@ -469,15 +661,26 @@ public class ChangeConfigurationActivity extends Activity implements View.OnClic
     private void initView() {
         mActivity = ChangeConfigurationActivity.this;
         GlobalConstant.mGlobalActivityArrayList.add(mActivity);
+        GlobalConstant.myCountDownTimer = new MyCountDownTimer(mActivity, 5000, 1000,
+                new SnackBarActionButtonListener() {
+                    @Override
+                    public void onClickOfSnackBarActionButtonView() {
+                        boolIsUserNoteRetrieveCommandSend = false;
+                        enableDisableNotification(false);
+                    }
+                }
+        );
 //        AppApplication.getInstance().setCurrentActivityReference(mActivity);
         mPrfTimeOutArray = mActivity.getResources().getStringArray(R.array.prf_time_out_array);
         mTxPowerArray = mActivity.getResources().getStringArray(R.array.tx_power_array);
         mChannel37SpinnerArray = mActivity.getResources().getStringArray(R.array.channel_array);
         mChannel38SpinnerArray = mActivity.getResources().getStringArray(R.array.channel_array);
         mChannel39SpinnerArray = mActivity.getResources().getStringArray(R.array.channel_array);
+        mPharmaModeSpinnerArray = mActivity.getResources().getStringArray(R.array.channel_array);
         mDataLoggingArray = mActivity.getResources().getStringArray(R.array.login_interval_array);
         mAls_EditText = (EditText) findViewById(R.id.als_edittext);
         mTamper_EditText = (EditText) findViewById(R.id.temper_edittext);
+        mUserNoteEdittext = (EditText) findViewById(R.id.user_note_edittext);
         mChannel_37_Spinner = (Spinner) findViewById(R.id.channel_37_spinner);
         mChannel_38_Spinner = (Spinner) findViewById(R.id.channel_38_spinner);
         mChannel_39_Spinner = (Spinner) findViewById(R.id.channel_39_spinner);
@@ -486,8 +689,33 @@ public class ChangeConfigurationActivity extends Activity implements View.OnClic
         mPrf_timeout_spinner = (Spinner) findViewById(R.id.prf_timeout_spinner);
         mSend_Button = (Button) findViewById(R.id.send_button);
         btnClearData = (Button) findViewById(R.id.btnClearData);
+        btnResetDevice = (Button) findViewById(R.id.btnResetDevice);
+        btnSave = (Button) findViewById(R.id.btnSave);
         btnClearData.setOnClickListener(this);
         mSend_Button.setOnClickListener(this);
+        btnResetDevice.setOnClickListener(this);
+        btnSave.setOnClickListener(this);
+        /**
+         * B4 Pharma Mode Fields
+         */
+        lLPharmaModeLayout = (LinearLayout) findViewById(R.id.lLPharmaModeLayout);
+        mPharmaModeDelayValue_EditText = (EditText) findViewById(R.id.mPharmaModeDelayValue);
+        mPharmaModeSpinner = (Spinner) findViewById(R.id.mPharmaModeSpinner);
+        if (GlobalConstant.STRING_CURRENT_BEACON_TYPE_CONNECTED.equalsIgnoreCase(GlobalKeys.BEACON_TYPE_B4_CONNECTED)) {
+            lLPharmaModeLayout.setVisibility(View.VISIBLE);
+        } else {
+            lLPharmaModeLayout.setVisibility(View.GONE);
+        }
+
+        mUserNoteEdittext.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+            public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+                if ((event != null && (event.getKeyCode() == KeyEvent.KEYCODE_ENTER)) || (actionId == EditorInfo.IME_ACTION_DONE)) {
+                    AndroidAppUtils.showInfoLog(TAG, "Enter pressed");
+                    AndroidAppUtils.hideKeyboard(mActivity, mUserNoteEdittext);
+                }
+                return false;
+            }
+        });
     }
 
     @Override
@@ -498,7 +726,28 @@ public class ChangeConfigurationActivity extends Activity implements View.OnClic
                 logPrint();
                 break;
             case R.id.btnClearData:
+
                 sendCommandForClearData();
+                break;
+            case R.id.btnResetDevice:
+                String strMessage = mActivity.getResources().getString(R.string.strFactoryResetDeviceMessage);
+                AndroidAppUtils.customAlertDialogWithGradiantBtn(mActivity, mActivity.getResources().getString(R.string.strWarningCaption), true, strMessage,
+                        true, mActivity.getResources().getString(R.string.strCaptionOK), true, new ChoiceDialogClickListener() {
+                            @Override
+                            public void onClickOfPositive() {
+                                sendCommandForResettingDevice();
+                            }
+
+                            @Override
+                            public void onClickOfNegative() {
+                            }
+                        }, true);
+
+                break;
+            case R.id.btnSave:
+//                sendCommandForSavingUserNote(AppHelper.STRING_INITIATE_USER_DATA_TRANSFER);
+                AndroidAppUtils.hideKeyboard(mActivity, btnSave);
+                sendCommandForSavingUserNote(AppHelper.STRING_SEND_USER_DATA_TRANSFER);
                 break;
         }
     }
@@ -516,6 +765,8 @@ public class ChangeConfigurationActivity extends Activity implements View.OnClic
         AndroidAppUtils.showLog("<<<< channel 38 Data ", channel_38_Int);
         AndroidAppUtils.showLog("<<<< channel 39 Data ", channel_39_Int);
         AndroidAppUtils.showLog("<<<< logIn Data ", mLogin_Interval_Int);
+        AndroidAppUtils.showLog("<<<< pharma mode ", mPharmaMode_String);
+        AndroidAppUtils.showLog("<<<< pharma mode delay ", mPharmaModeDelay_String);
     }
 
     @Override
@@ -523,8 +774,8 @@ public class ChangeConfigurationActivity extends Activity implements View.OnClic
         if (mDataLoggingListener != null) {
             mDataLoggingListener = null;
         }
-        if (!GlobalConstant.CONNECTED_STATE && ConnectionControl.connectionControl != null)
-            ConnectionControl.connectionControl.UnregisterAllServices();
+//        if (!GlobalConstant.CONNECTED_STATE && ConnectionControl.connectionControl != null)
+//            ConnectionControl.connectionControl.UnregisterAllServices();
         super.onDestroy();
     }
 
@@ -540,33 +791,56 @@ public class ChangeConfigurationActivity extends Activity implements View.OnClic
      * Method Name : showMessageAccordingToOperation
      * Description : This method is used for showing snack bar corresponding to event happened
      *
-     * @param strMessage
+     * @param strOperationCode
      */
-    public void showMessageAccordingToOperation(String strMessage) {
-        if (strMessage.equalsIgnoreCase("01")) {
-            AndroidAppUtils.showSnackBar(AppApplication.getInstance(), mActivity.getResources().getString(R.string.strDeviceTurnedOffSuccessfullyCaption));
-            if (GlobalConstant.CONNECTED_STATE) {
-                GlobalConstant.IS_NEED_TO_SHOW_DISCONNECT_MESSAGE = false;
-                if (BluetoothLeService.getInstance() != null) {
-                    BluetoothLeService.getInstance().disconnect();
-
-                } else {
-                    AndroidAppUtils.showLog(TAG, "BluetoothLeService.getInstance() is null");
+    public void showMessageAccordingToOperation(String strOperationCode) {
+        switch (strOperationCode) {
+            case AppHelper.ZERO_ONE:
+                AndroidAppUtils.showSnackBar(AppApplication.getInstance(), mActivity.getResources().getString(R.string.strDeviceTurnedOffSuccessfullyCaption));
+                if (GlobalConstant.CONNECTED_STATE) {
                     GlobalConstant.IS_NEED_TO_SHOW_DISCONNECT_MESSAGE = false;
-                }
-            }
-            new Handler(Looper.getMainLooper()).postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    if (DeviceAdapter.mConnectionControl != null) {
-                        DeviceAdapter.mConnectionControl.removeAllActivityExceptScanning();
+                    if (BluetoothLeService.getInstance() != null) {
+                        BluetoothLeService.getInstance().disconnect();
+
+                    } else {
+                        AndroidAppUtils.showLog(TAG, "BluetoothLeService.getInstance() is null");
                     }
                 }
-            }, 3000);
-        } else if (strMessage.equalsIgnoreCase("02")) {
-            saveCurrentConfigurationData();
-            AndroidAppUtils.showSnackBar(AppApplication.getInstance(), mActivity.getResources().getString(R.string.strConfigurationChangedSuccessfullyCaption));
+                new Handler(Looper.getMainLooper()).postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        if (DeviceAdapter.mConnectionControl != null) {
+                            DeviceAdapter.mConnectionControl.removeAllActivityExceptScanning();
+                        }
+                    }
+                }, 3000);
+                break;
+            case AppHelper.ZERO_TWO:
+                saveCurrentConfigurationData();
+                AndroidAppUtils.showSnackBar(AppApplication.getInstance(), mActivity.getResources().getString(R.string.strConfigurationChangedSuccessfullyCaption));
+                break;
+            case AppHelper.ZERO_FIVE:
+                AndroidAppUtils.showSnackBar(AppApplication.getInstance(), mActivity.getResources().getString(R.string.strResetDeviceRequestSendSuccessMsg));
+                if (GlobalConstant.CONNECTED_STATE) {
+                    GlobalConstant.IS_NEED_TO_SHOW_DISCONNECT_MESSAGE = false;
+                    if (BluetoothLeService.getInstance() != null) {
+                        BluetoothLeService.getInstance().disconnect();
+
+                    } else {
+                        AndroidAppUtils.showLog(TAG, "BluetoothLeService.getInstance() is null");
+                    }
+                }
+                new Handler(Looper.getMainLooper()).postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        if (DeviceAdapter.mConnectionControl != null) {
+                            DeviceAdapter.mConnectionControl.removeAllActivityExceptScanning();
+                        }
+                    }
+                }, 3000);
+                break;
         }
+
     }
 
     /**
@@ -599,7 +873,6 @@ public class ChangeConfigurationActivity extends Activity implements View.OnClic
             };
             if (DeviceAdapter.mConnectionControl != null && ConnectionControl.connectionControl != null) {
                 AndroidAppUtils.showProgressDialog(mActivity, mActivity.getResources().getString(R.string.please_wait), false);
-//                DeviceAdapter.mConnectionControl.enableNotification(ConnectionControl.dl_notification_characteristics);
                 new Handler(Looper.getMainLooper()).postDelayed(new Runnable() {
                     @Override
                     public void run() {
@@ -620,4 +893,154 @@ public class ChangeConfigurationActivity extends Activity implements View.OnClic
         }
 
     }
+
+    /**
+     * Method Name : sendCommandForResettingDevice
+     * Description : This method is used for sending command to device for clear data that is stored
+     * and set configuration to default making device as factory reset
+     */
+    private void sendCommandForResettingDevice() {
+        try {
+            String strResetDevice = AppHelper.ZERO_FIVE;
+            /**
+             * Given arbitrary file id and record id for resetting the device
+             */
+            String strFileId = AppHelper.DOUBLE_ZERO + AppHelper.ZERO_FIVE;
+            String strRecordId = AppHelper.DOUBLE_ZERO + AppHelper.ZERO_ONE;
+            byte[] etByteFileID = AndroidAppUtils.verifyForMoreThanTwoDigit(strFileId.isEmpty() ? AppHelper.DOUBLE_ZERO + AppHelper.ZERO_FIVE : AndroidAppUtils.appendNoOfZeroIfRequired(strFileId));
+            byte[] etByteRecordID = AndroidAppUtils.verifyForMoreThanTwoDigit(strRecordId.isEmpty() ? AppHelper.DOUBLE_ZERO + AppHelper.ZERO_ONE : AndroidAppUtils.appendNoOfZeroIfRequired(strRecordId));
+            final byte[] byteClearData = {(byte) (Integer.parseInt(mPrfTimeOut.isEmpty() ? "10" : AndroidAppUtils.appendNoOfZeroIfRequired(mPrfTimeOut)) & 0xFF),
+                    (byte) (Integer.parseInt(mTxPowerInt.isEmpty() ? AppHelper.ZERO_FOUR : AndroidAppUtils.appendNoOfZeroIfRequired(mTxPowerInt)) & 0xFF),
+                    (byte) (Integer.parseInt(mTamper_String.isEmpty() ? "20" : AndroidAppUtils.appendNoOfZeroIfRequired(mTamper_String)) & 0xFF),
+                    (byte) (Integer.parseInt(channel_37_Int.isEmpty() ? AppHelper.DOUBLE_ZERO : AndroidAppUtils.appendNoOfZeroIfRequired(channel_37_Int)) & 0xFF),
+                    (byte) (Integer.parseInt(channel_38_Int.isEmpty() ? AppHelper.DOUBLE_ZERO : AndroidAppUtils.appendNoOfZeroIfRequired(channel_38_Int)) & 0xFF),
+                    (byte) (Integer.parseInt(channel_39_Int.isEmpty() ? AppHelper.DOUBLE_ZERO : AndroidAppUtils.appendNoOfZeroIfRequired(channel_39_Int)) & 0xFF),
+                    etByteFileID[0],
+                    etByteFileID[1],
+                    etByteRecordID[0],
+                    etByteRecordID[1],
+                    (byte) (Integer.parseInt(mLogin_Interval_Int.isEmpty() ? "15" : AndroidAppUtils.appendNoOfZeroIfRequired(mLogin_Interval_Int)) & 0xFF),
+                    (byte) (Integer.parseInt(strTurnOff.isEmpty() ? AppHelper.ZERO_FIVE : AndroidAppUtils.appendNoOfZeroIfRequired(strResetDevice)) & 0xFF)
+            };
+            if (DeviceAdapter.mConnectionControl != null && ConnectionControl.connectionControl != null) {
+                AndroidAppUtils.showProgressDialog(mActivity, mActivity.getResources().getString(R.string.please_wait), false);
+                new Handler(Looper.getMainLooper()).postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        strTurnOff = AppHelper.ZERO_FIVE;
+                        boolIsResetDeviceCommandSend = true;
+                        DeviceAdapter.mConnectionControl.writeFileToDevice
+                                (ConnectionControl.dl_notification_characteristics, byteClearData);
+                    }
+                }, 1000);
+
+            } else {
+                AndroidAppUtils.showErrorLog(TAG, "Either ConnectionControl.connectionControl or DeviceAdapter.mConnectionControl is null");
+            }
+        } catch (
+                Exception e)
+
+        {
+            AndroidAppUtils.showInfoLog(TAG, "error message " + e.getMessage());
+        }
+
+    }
+
+    /**
+     * Method Name : sendCommandForSavingUserNote
+     * Description : This method is used for sending command to device for saving the user notes to the device
+     * Info like mac address, name,etc
+     *
+     * @param stringInitiateUserDataTransfer
+     */
+    @RequiresApi(api = Build.VERSION_CODES.KITKAT)
+    private void sendCommandForSavingUserNote(String stringInitiateUserDataTransfer) {
+        try {
+            int intDataSize = 12;
+            byte[] byteDataToWritten = new byte[intDataSize];
+            if (!stringInitiateUserDataTransfer.isEmpty()
+                    && stringInitiateUserDataTransfer.equalsIgnoreCase(AppHelper.STRING_INITIATE_USER_DATA_TRANSFER)) {
+                intDataSize = 12;
+                byteDataToWritten = new byte[intDataSize];
+                String strUserNoteData = AppHelper.ZERO_FOUR;
+                /**
+                 * Given arbitrary file id and record id for initiating transfer of user test data to the device
+                 */
+                String strFileId = AppHelper.DOUBLE_ZERO + AppHelper.ZERO_TWO;
+                String strRecordId = AppHelper.DOUBLE_ZERO + AppHelper.ZERO_TWO;
+                byte[] etByteFileID = AndroidAppUtils.verifyForMoreThanTwoDigit(strFileId.isEmpty() ? AppHelper.DOUBLE_ZERO + AppHelper.ZERO_FIVE : AndroidAppUtils.appendNoOfZeroIfRequired(strFileId));
+                byte[] etByteRecordID = AndroidAppUtils.verifyForMoreThanTwoDigit(strRecordId.isEmpty() ? AppHelper.DOUBLE_ZERO + AppHelper.ZERO_ONE : AndroidAppUtils.appendNoOfZeroIfRequired(strRecordId));
+                final byte[] byteClearData = {(byte) (Integer.parseInt(mPrfTimeOut.isEmpty() ? "10" : AndroidAppUtils.appendNoOfZeroIfRequired(mPrfTimeOut)) & 0xFF),
+                        (byte) (Integer.parseInt(mTxPowerInt.isEmpty() ? AppHelper.ZERO_FOUR : AndroidAppUtils.appendNoOfZeroIfRequired(mTxPowerInt)) & 0xFF),
+                        (byte) (Integer.parseInt(mTamper_String.isEmpty() ? "20" : AndroidAppUtils.appendNoOfZeroIfRequired(mTamper_String)) & 0xFF),
+                        (byte) (Integer.parseInt(channel_37_Int.isEmpty() ? AppHelper.DOUBLE_ZERO : AndroidAppUtils.appendNoOfZeroIfRequired(channel_37_Int)) & 0xFF),
+                        (byte) (Integer.parseInt(channel_38_Int.isEmpty() ? AppHelper.DOUBLE_ZERO : AndroidAppUtils.appendNoOfZeroIfRequired(channel_38_Int)) & 0xFF),
+                        (byte) (Integer.parseInt(channel_39_Int.isEmpty() ? AppHelper.DOUBLE_ZERO : AndroidAppUtils.appendNoOfZeroIfRequired(channel_39_Int)) & 0xFF),
+                        etByteFileID[0],
+                        etByteFileID[1],
+                        etByteRecordID[0],
+                        etByteRecordID[1],
+                        (byte) (Integer.parseInt(mLogin_Interval_Int.isEmpty() ? "15" : AndroidAppUtils.appendNoOfZeroIfRequired(mLogin_Interval_Int)) & 0xFF),
+                        (byte) (Integer.parseInt(strTurnOff.isEmpty() ? AppHelper.ZERO_THREE : AndroidAppUtils.appendNoOfZeroIfRequired(strUserNoteData)) & 0xFF)
+                };
+                System.arraycopy(byteClearData, 0, byteDataToWritten, 0, byteClearData.length);
+                boolIsUserNoteSendRequestGenerated = true;
+            } else if (stringInitiateUserDataTransfer.equalsIgnoreCase(AppHelper.STRING_SEND_USER_DATA_TRANSFER)) {
+                intDataSize = 20;
+                byteDataToWritten = new byte[intDataSize];
+                String strUserNoteData = mUserNoteEdittext.getText().toString().trim();
+                if (TextUtils.isEmpty(strUserNoteData)) {
+                    mUserNoteEdittext.setError("Please enter text");
+                } else {
+                    int stringLength = strUserNoteData.toString().trim().length();
+                    int intNoOfZeroRequired = 21 - stringLength;
+                    StringBuffer sb = new StringBuffer();
+                    sb.append(strUserNoteData);
+                    strUserNoteData = sb.toString();
+                    AndroidAppUtils.showInfoLog(TAG, "strUserNoteData : " + strUserNoteData
+                            + "\n stringLength : " + stringLength +
+                            "\n intNoOfZeroRequired :  " + intNoOfZeroRequired);
+                    final byte[] byteClearData = strUserNoteData.getBytes(StandardCharsets.UTF_8); /*Base64.decode(strUserNoteData, Base64.DEFAULT);*/
+                    int intNeedToCopy = stringLength - 12;
+                    if (stringLength > 11) {
+                        System.arraycopy(byteClearData, 0, byteDataToWritten, 0, 11);
+                        byteDataToWritten[11] = 0x06;
+                        System.arraycopy(byteClearData, 11, byteDataToWritten, 12, intNeedToCopy);
+                    } else {
+                        System.arraycopy(byteClearData, 0, byteDataToWritten, 0, stringLength);
+                        byteDataToWritten[11] = 0x06;
+                    }
+
+                    AndroidAppUtils.showInfoLog(TAG, "byteClearData : " + byteClearData +
+                            "\n converted byteClearData : " + AndroidAppUtils.convertToHexString(byteClearData) +
+                            "\nByte data : " + byteDataToWritten +
+                            "\n hex data : " + AndroidAppUtils.convertToHexString(byteDataToWritten)
+
+                    );
+                    boolIsUserNoteSend = true;
+
+                    if (DeviceAdapter.mConnectionControl != null && ConnectionControl.connectionControl != null) {
+                        AndroidAppUtils.showProgressDialog(mActivity, mActivity.getResources().getString(R.string.please_wait), false);
+                        final byte[] finalByteDataToWritten = byteDataToWritten;
+                        new Handler(Looper.getMainLooper()).postDelayed(new Runnable() {
+                            @Override
+                            public void run() {
+                                if (DeviceAdapter.mConnectionControl != null)
+                                    DeviceAdapter.mConnectionControl.writeFileToDevice
+                                            (ConnectionControl.dl_notification_characteristics, finalByteDataToWritten);
+                            }
+                        }, 1000);
+
+                    } else {
+                        AndroidAppUtils.showErrorLog(TAG, "Either ConnectionControl.connectionControl or DeviceAdapter.mConnectionControl is null");
+                    }
+                }
+            }
+        } catch (Exception e) {
+            AndroidAppUtils.showInfoLog(TAG, "error message " + e.getMessage());
+        }
+
+    }
+
+
 }

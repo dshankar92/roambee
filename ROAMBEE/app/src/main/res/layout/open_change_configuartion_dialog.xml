@@ -19,7 +19,7 @@
             android:id="@+id/lLPrfTimeout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/margin_20dp"
+            android:layout_marginTop="@dimen/margin_10dp"
             android:orientation="horizontal">
 
             <TextView
@@ -200,11 +200,54 @@
                 android:entries="@array/login_interval_array" />
         </LinearLayout>
 
+        <include
+            android:id="@+id/lLPharmaModeLayout"
+            layout="@layout/pharma_mode_b4_layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/lLDataLoggingInterval"
+            android:layout_marginTop="@dimen/margin_10dp" />
+
+        <LinearLayout
+            android:id="@+id/lLUserNote"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/lLPharmaModeLayout"
+            android:orientation="horizontal">
+
+            <TextView
+                style="@style/TextView_size_14sp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/strUserNote" />
+
+            <EditText
+                android:id="@+id/user_note_edittext"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:maxLength="19"
+                android:digits="abcdefghijklmnopqrstuvwxyz1234567890 "
+                android:inputType="textVisiblePassword"
+                android:maxLines="1" />
+
+            <android.support.v7.widget.AppCompatButton
+                android:id="@+id/btnSave"
+                android:layout_weight="0.3"
+                android:layout_width="wrap_content"
+                android:layout_height="30dp"
+                android:textAllCaps="true"
+                android:textColor="@color/black"
+                android:background="@android:drawable/ic_menu_send"
+                android:textStyle="normal" />
+        </LinearLayout>
+
         <LinearLayout
             android:id="@+id/lLClearDataLayout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_below="@id/lLDataLoggingInterval"
+            android:layout_below="@id/lLUserNote"
             android:layout_marginTop="@dimen/margin_10dp"
             android:gravity="center"
             android:orientation="horizontal"
@@ -219,7 +262,38 @@
                 android:textColor="@color/black"
                 android:textSize="@dimen/text_size_14sp"
                 android:textStyle="normal" />
+
+            <android.support.v7.widget.AppCompatButton
+                android:id="@+id/btnResetDevice"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/strCaptionResetDevice"
+                android:textAllCaps="true"
+                android:textColor="@color/black"
+                android:textSize="@dimen/text_size_14sp"
+                android:textStyle="normal" />
         </LinearLayout>
+
+        <!-- <LinearLayout
+             android:id="@+id/lLResetDeviceLayout"
+             android:layout_width="match_parent"
+             android:layout_height="wrap_content"
+             android:layout_below="@id/lLClearDataLayout"
+             android:layout_marginTop="@dimen/margin_10dp"
+             android:gravity="center"
+             android:orientation="horizontal"
+             android:visibility="visible">
+
+             <android.support.v7.widget.AppCompatButton
+                 android:id="@+id/btnResetDevice"
+                 android:layout_width="wrap_content"
+                 android:layout_height="wrap_content"
+                 android:text="@string/strCaptionResetDevice"
+                 android:textAllCaps="true"
+                 android:textColor="@color/black"
+                 android:textSize="@dimen/text_size_14sp"
+                 android:textStyle="normal" />
+         </LinearLayout>-->
 
         <LinearLayout
             android:id="@+id/lLButtonLayout"

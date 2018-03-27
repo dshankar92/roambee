@@ -183,7 +183,16 @@
     <string name="strCaptionOnOff">Turn Device Off</string>
     <string name="strCaptionTimeout">Broadcasting Interval</string>
     <string name="strCaptionClearData">Clear Data</string>
+    <string name="strCaptionResetDevice">Reset Device</string>
     <string name="strEnableCaption">Enable</string>
+    <string name="strResetDeviceRequestSendSuccessMsg">Reset Device Request Send Successfully</string>
+    <string name="strFactoryResetDeviceMessage">Performing Reset Device will clear all data and set configuration to default.  To Continue click OK, to cancel click cross icon</string>
+    <string name="strPharmaMode">Pharma Mode</string>
+    <string name="strPharmaModeDelay">Pharma Mode Delay</string>
+    <string name="strUserNote">User Note</string>
+    <string name="strCaptionSave">Save</string>
+    <string name="strUserNoteSaveSuccessMsg">User Note Save Successfully</string>
+    <string name="strFailToRetrieveMag">Fail to Retrieve User Data</string>
 
 
     <!--DATA LOGGING ACTIVITY-->
@@ -211,6 +220,7 @@
     <string name="download_again">Files do not exits. Downloading again&#8230;</string>
     <string name="scan_devices">Scanning devices&#8230;</string>
     <string name="strCaptionConnecting">Connecting&#8230;</string>
+    <string name="strRetrieveUserNote">Retrieving User Notes&#8230;</string>
 
     <!--PROGRESS DIALOG TEXT-->
     <string name="strWarningCaption">WARNING</string>
@@ -223,16 +233,19 @@
     <string name="strSerialNumberCaption">Sr. No</string>
     <string name="strDateCaption">Date</string>
     <string name="strTimeCaption">Time</string>
-    <string name="strTemperatureCaption">Temp (°C)</string>
-    <string name="strLightCaption">Light \n(%)</string>
-    <string name="strTamperCaption">Tamper \n(0/1)</string>
-    <string name="strBatteryCaption">Battery \n(week)</string>
+    <string name="strTemperatureCaption">Temp\n(°C)</string>
+    <string name="strLightCaption">Light\n(%)</string>
+    <string name="strTamperCaption">Tamper\n(0/1)</string>
+    <string name="strBatteryCaption">Battery\n(week)</string>
     <string name="strHumidityCaption">Humidity</string>
-    <string name="strPressureCaption">Pressure \n(Pa)</string>
+    <string name="strPressureCaption">Pressure\n(Pa)</string>
     <string name="strTimestamp">TimeStamp</string>
     <string name="strTempCaption">Temperature</string>
     <string name="strBatteryLifeCaption">Battery Life</string>
     <string name="strLightIntensityCaption">Light Intensity</string>
+    <string name="strShockCaption">Shock</string>
+    <string name="strTiltAngelCaption">Tilt Angel</string>
+
 
 
 </resources>

@@ -61,6 +61,10 @@ public class SelectionActivity extends Activity implements View.OnClickListener 
      * MyCountDownTimer reference object for handling configuration retrieval
      */
     private MyCountDownTimer myCountDownTimer;
+    /**
+     * Integer reference object for holding the retry count
+     */
+    private int intRetryCount = 0;
 
 
     @Override
@@ -98,6 +102,7 @@ public class SelectionActivity extends Activity implements View.OnClickListener 
      */
     private void initView() {
         mActivity = SelectionActivity.this;
+//        AppApplication.getInstance().addActivityToGlobalList(mActivity);
         GlobalConstant.mGlobalActivityArrayList.add(mActivity);
         btn_data_logging = (Button) findViewById(R.id.btn_data_logging);
         btn_upgrade = (Button) findViewById(R.id.btn_upgrade);
@@ -123,7 +128,12 @@ public class SelectionActivity extends Activity implements View.OnClickListener 
         myCountDownTimer = new MyCountDownTimer(mActivity, 10000, 1000, new SnackBarActionButtonListener() {
             @Override
             public void onClickOfSnackBarActionButtonView() {
-                retrieveCurrentConfigurationOfDevice();
+                if (intRetryCount < 2) {
+                    intRetryCount++;
+                    retrieveCurrentConfigurationOfDevice();
+                } else {
+                    onBackPressed();
+                }
             }
         });
     }
@@ -246,12 +256,17 @@ public class SelectionActivity extends Activity implements View.OnClickListener 
         if (GlobalConstant.CONNECTED_STATE) {
             if (BluetoothLeService.getInstance() != null) {
                 BluetoothLeService.getInstance().disconnect();
-                GlobalConstant.IS_NEED_TO_SHOW_DISCONNECT_MESSAGE = false;
                 GlobalConstant.BOOL_IS_NEED_TO_RETRIEVE_DATA = true;
+                if (GlobalConstant.BOOL_IS_SERVICES_DISCOVERED) {
+                    GlobalConstant.BOOL_IS_SERVICES_DISCOVERED = false;
+                }
+                if (GlobalConstant.BOOL_IS_CONNECT_BUTTON_CLICKED) {
+                    GlobalConstant.BOOL_IS_CONNECT_BUTTON_CLICKED = false;
+                }
             } else {
                 AndroidAppUtils.showLog(TAG, "BluetoothLeService.getInstance() is null");
-                GlobalConstant.IS_NEED_TO_SHOW_DISCONNECT_MESSAGE = false;
             }
+            GlobalConstant.IS_NEED_TO_SHOW_DISCONNECT_MESSAGE = false;
         }
         super.onBackPressed();
     }
@@ -264,6 +279,7 @@ public class SelectionActivity extends Activity implements View.OnClickListener 
                 if (GlobalConstant.BOOL_IS_NEED_TO_RETRIEVE_DATA) {
                     retrieveCurrentConfigurationOfDevice();
                     GlobalConstant.BOOL_IS_NEED_TO_RETRIEVE_DATA = false;
+
                 }
             }
         }
@@ -319,16 +335,29 @@ public class SelectionActivity extends Activity implements View.OnClickListener 
 
                 if (byteData != null && byteData.length > 3) {
                     String strInValidValue = AndroidAppUtils.unHex(AndroidAppUtils.convertToHexString(byteData));
-//                    int intValue = Integer.parseInt(strInValidValue);
-//                    AndroidAppUtils.showErrorLog(TAG, "intValue : " + intValue);
                     if (!strInValidValue.equalsIgnoreCase("000000000000"))
                         saveRetrievedData(byteData);
+                    else if (strInValidValue.equalsIgnoreCase("000000000000")) {
+                        if (AppApplication.getInstance().getCurrentActivity() != null &&
+                                AppApplication.getInstance().getCurrentActivity() instanceof SelectionActivity)
+                            AndroidAppUtils.showSnackBarWithActionButton(AppApplication.getInstance(), mActivity.getResources().getString(R.string.str_Fail_to_retrieve_config),
+                                    new SnackBarActionButtonListener() {
+                                        @Override
+                                        public void onClickOfSnackBarActionButtonView() {
+                                            retrieveCurrentConfigurationOfDevice();
+                                        }
+                                    });
+                    }
+
                     enableDisableNotification(false);
                     myCountDownTimer.cancel();
                 } else {
                     GlobalConstant.IS_NEED_TO_SHOW_DISCONNECT_MESSAGE = false;
                     AndroidAppUtils.showSnackBar(AppApplication.getInstance(), mActivity.getResources().getString(R.string.strEnteredBootLoaderModeCaption));
-                    GlobalConstant.BOOL_COMMAND_FOR_BOOT_LOADER_SENT = false;
+                    if (GlobalConstant.BOOL_COMMAND_FOR_BOOT_LOADER_SENT) {
+                        GlobalConstant.BOOL_COMMAND_FOR_BOOT_LOADER_SENT = false;
+
+                    }
                     new Handler(Looper.getMainLooper()).postDelayed(new Runnable() {
                         @Override
                         public void run() {
@@ -355,6 +384,7 @@ public class SelectionActivity extends Activity implements View.OnClickListener 
                         }, 2000);
 
                         boolIsClearDataCommandSend = false;
+
                     } else {
                         enableDisableNotification(true);
                     }
@@ -372,6 +402,7 @@ public class SelectionActivity extends Activity implements View.OnClickListener 
      */
     private void saveRetrievedData(byte[] byteData) {
         byte byteConfigurationData;
+        byte[] bytePharmaModeDelayValue = new byte[2];
         if (byteData != null && byteData.length > 0) {
             GroupConfigurationModel groupConfigurationModel = new GroupConfigurationModel();
             for (int i = 0; i < byteData.length; i++) {
@@ -403,6 +434,20 @@ public class SelectionActivity extends Activity implements View.OnClickListener 
                     byteConfigurationData = byteData[i];
                     AndroidAppUtils.showInfoLog(TAG, "data logging interval : " + (byteConfigurationData & 0xff));
                     groupConfigurationModel.setStrDataLoggingInterval((byteConfigurationData & 0xff) + "");
+                } else if (i == 7) {
+                    byteConfigurationData = byteData[i];
+                    bytePharmaModeDelayValue[i - 7] = byteConfigurationData;
+                    AndroidAppUtils.showInfoLog(TAG, "pharma mode msb : " + (byteConfigurationData & 0xff));
+//                    groupConfigurationModel.setStrDataLoggingInterval((byteConfigurationData & 0xff) + "");
+                } else if (i == 8) {
+                    byteConfigurationData = byteData[i];
+                    bytePharmaModeDelayValue[i - 7] = byteConfigurationData;
+                    AndroidAppUtils.showInfoLog(TAG, "pharma mode lsb " + Integer.parseInt(AndroidAppUtils.convertToHexString(bytePharmaModeDelayValue), 16) + "");
+                    groupConfigurationModel.setStrPharmaModeDelay(Integer.parseInt(AndroidAppUtils.convertToHexString(bytePharmaModeDelayValue), 16) + "");
+                } else if (i == 9) {
+                    byteConfigurationData = byteData[i];
+                    AndroidAppUtils.showInfoLog(TAG, "pharma mode status(enable/disable) : " + (byteConfigurationData & 0xff));
+                    groupConfigurationModel.setStrPharmaModeValue((byteConfigurationData & 0xff) + "");
                 }
 
             }
@@ -444,10 +489,14 @@ public class SelectionActivity extends Activity implements View.OnClickListener 
             boolIsDeviceConnected = false;
             AndroidAppUtils.showLog(TAG, "Need to connect to device");
             BluetoothDevice bluetoothDevice = GlobalConstant.mBluetoothAdapter != null ? GlobalConstant.mBluetoothAdapter.getRemoteDevice(GlobalConstant.DEVICE_MAC) : null;
+
             AndroidAppUtils.hideProgressDialog();
-            if (ConnectionControl.connectionControl != null && ConnectionControl.connectionControl.mActivity != null)
+            if (ConnectionControl.connectionControl != null && ConnectionControl.connectionControl.mActivity != null) {
+                AndroidAppUtils.dismissGradientDialog();
+                GlobalConstant.IS_NEED_TO_SHOW_DISCONNECT_MESSAGE = true;
                 DeviceAdapter.mConnectionControl = new ConnectionControl(ConnectionControl.connectionControl.mActivity, bluetoothDevice, mActivity);
-            else
+
+            } else
                 AndroidAppUtils.showErrorLog(TAG, " ConnectionControl.connectionControl.mActivity is null");
         }
         return boolIsDeviceConnected;
@@ -458,8 +507,6 @@ public class SelectionActivity extends Activity implements View.OnClickListener 
         if (mDataLoggingListener != null) {
             mDataLoggingListener = null;
         }
-//        if (!GlobalConstant.CONNECTED_STATE && ConnectionControl.connectionControl != null)
-//            ConnectionControl.connectionControl.UnregisterAllServices();
         super.onDestroy();
     }
 

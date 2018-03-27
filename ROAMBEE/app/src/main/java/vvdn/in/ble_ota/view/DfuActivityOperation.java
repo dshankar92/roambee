@@ -29,6 +29,7 @@ import no.nordicsemi.android.dfu.DfuServiceListenerHelper;
 import vvdn.in.ble_ota.AndroidAppUtils;
 import vvdn.in.ble_ota.R;
 import vvdn.in.ble_ota.Utils.GlobalConstant;
+import vvdn.in.ble_ota.adapter.DeviceAdapter;
 import vvdn.in.ble_ota.application.AppApplication;
 import vvdn.in.ble_ota.blecontrols.BluetoothLeService;
 import vvdn.in.ble_ota.control.HeaderViewManager;
@@ -421,7 +422,7 @@ public class DfuActivityOperation extends Activity {
             mTvUploadingBtn.setText(mActivity.getResources().getString(R.string.strDFUStartedCaption));
             mTvUploadingBtn.setVisibility(View.VISIBLE);
             AndroidAppUtils.showInfoLog(TAG, "DFU_PROCESS_STARTING " + deviceAddress);
-            GlobalConstant.IS_DFU_OPERATION_STILL_IN_PROCESS=true;
+            GlobalConstant.IS_DFU_OPERATION_STILL_IN_PROCESS = true;
         }
 
         @Override
@@ -455,7 +456,7 @@ public class DfuActivityOperation extends Activity {
                     manager.cancel(DfuService.NOTIFICATION_ID);
                     isOADInProcess = false;
                     GlobalConstant.BOOL_IS_NEED_TO_RETRIEVE_DATA = true;
-                    GlobalConstant.IS_DFU_OPERATION_STILL_IN_PROCESS=false;
+                    GlobalConstant.IS_DFU_OPERATION_STILL_IN_PROCESS = false;
                     ExitFromScreen();
                 }
             }, 200);
@@ -486,6 +487,23 @@ public class DfuActivityOperation extends Activity {
             AndroidAppUtils.showErrorLog(TAG, "error : " + error +
                     "errorType : " + errorType + "message : " + message);
             GlobalConstant.IS_NEED_TO_SHOW_DISCONNECT_MESSAGE = true;
+            AndroidAppUtils.customAlertDialogWithGradiantBtn(AppApplication.getInstance().getCurrentActivity(), mActivity.getResources().getString(R.string.strInformationCaption),
+                    true, message, true, mActivity.getResources().getString(R.string.strCaptionOK), true,
+                    new ChoiceDialogClickListener() {
+                        @Override
+                        public void onClickOfPositive() {
+                            if (DeviceAdapter.mConnectionControl != null)
+                                DeviceAdapter.mConnectionControl.removeAllActivityExceptScanning();
+                            else if (mActivity != null)
+                                mActivity.finish();
+
+                        }
+
+                        @Override
+                        public void onClickOfNegative() {
+
+                        }
+                    }, false);
         }
     };
 

@@ -50,13 +50,64 @@ public class DataLoggingModel {
      * Pressure of device indicating value after decimal point
      */
     String strRsbPressure = "";
+    /**
+     * Shock Value for Ble Beacon B5 , range from 0-7
+     */
+    String strShockValue = " ";
+    /**
+     * Tilt value fro BLE beacon device i.e what is the inclined angel with ground
+     */
+    String strLSBTiltAngel = "";
+    /**
+     * Tilt value fro BLE beacon device i.e what is the inclined angel with ground
+     */
+    String strTiltAngel="";
 
+    public String getStrTiltAngel() {
+        return strTiltAngel;
+    }
+
+    public void setStrTiltAngel(String strTiltAngel) {
+        this.strTiltAngel = strTiltAngel;
+    }
+
+
+
+    public String getStrLSBTiltAngel() {
+        return strLSBTiltAngel;
+    }
+
+    public void setStrLSBTiltAngel(String strLSBTiltAngel) {
+        this.strLSBTiltAngel = strLSBTiltAngel;
+    }
+
+    public String getStrRSBTiltAngel() {
+        return strRSBTiltAngel;
+    }
+
+    public void setStrRSBTiltAngel(String strRSBTiltAngel) {
+        this.strRSBTiltAngel = strRSBTiltAngel;
+    }
+
+    /**
+     * Tilt value fro BLE beacon device i.e what is the inclined angel with ground
+     */
+    String strRSBTiltAngel = "";
+
+    public String getStrShockValue() {
+        return strShockValue;
+    }
+
+    public void setStrShockValue(String strShockValue) {
+        this.strShockValue = strShockValue;
+    }
 
 
     /**
      * Pressure of device
      */
     String strPressure = "";
+
     public String getStrLsbHumidity() {
         return strLsbHumidity;
     }
@@ -139,6 +190,7 @@ public class DataLoggingModel {
     public void setStrTemper(String strTemper) {
         this.strTemper = strTemper;
     }
+
     public String getStrPressure() {
         return strPressure;
     }

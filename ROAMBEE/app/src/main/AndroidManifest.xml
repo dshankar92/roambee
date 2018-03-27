@@ -30,7 +30,7 @@
 
         <activity
             android:name=".view.BleScanScreen"
-            android:screenOrientation="portrait">
+            android:screenOrientation="portrait"
             android:windowSoftInputMode="stateAlwaysHidden">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -45,7 +45,8 @@
             android:screenOrientation="portrait" />
         <activity
             android:name=".view.SelectionActivity"
-            android:screenOrientation="portrait" />
+            android:screenOrientation="portrait"
+            />
         <activity
             android:name=".view.ChangeConfigurationActivity"
             android:screenOrientation="portrait" />

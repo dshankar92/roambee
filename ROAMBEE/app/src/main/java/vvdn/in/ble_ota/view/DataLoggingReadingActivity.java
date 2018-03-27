@@ -2,6 +2,7 @@ package vvdn.in.ble_ota.view;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.os.Build;
 import android.os.Bundle;
@@ -93,10 +94,7 @@ public class DataLoggingReadingActivity extends Activity {
      * ArrayList<DataLoggingModel> reference object for holding the logs details
      */
     private ArrayList<GroupIndexModel> mStoredGroupArrayList = new ArrayList<>();
-    /**
-     * Constant boolean for handling the spinner first time selection
-     */
-    private boolean boolInhibitSpinner = true, boolIsRecordPacketWritingInProcess = false;
+
     /**
      * RelativeLayout reference object for handling spinner item click
      */
@@ -160,7 +158,8 @@ public class DataLoggingReadingActivity extends Activity {
     /**
      * Relative Layout reference object
      */
-    private RelativeLayout rLBeaconB1DataLoggingHeader, mRlSpinnerLayout, mRlGroupInfoLayout, rLBeaconB4DataLoggingHeader;
+    private RelativeLayout rLBeaconB1DataLoggingHeader, mRlSpinnerLayout, mRlGroupInfoLayout, rLBeaconB4DataLoggingHeader,
+            rLBeaconB5DataLoggingHeader;
     /**
      * Integer reference object for handling the retry count for connection
      */
@@ -201,6 +200,10 @@ public class DataLoggingReadingActivity extends Activity {
      * MyCountDownTimer reference object for handling the fetching record data availability
      */
     private MyCountDownTimer myCountDownTimer;
+    /**
+     * GroupIndexModel reference object
+     */
+    private GroupIndexModel mGroupIndexModel;
 
 
     @Override
@@ -208,6 +211,7 @@ public class DataLoggingReadingActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.data_logging_reading_activity_listview);
         GlobalConstant.BOOL_IS_DATA_LOGGING_READING_ACTIVITY_VISIBLE = true;
+//        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
         if (GlobalConstant.CONNECTED_STATE)
             GlobalConstant.IS_NEED_TO_SHOW_DISCONNECT_MESSAGE = false;
         else
@@ -250,12 +254,12 @@ public class DataLoggingReadingActivity extends Activity {
             }
         } else if (GlobalConstant.STRING_CURRENT_BEACON_TYPE_CONNECTED.startsWith(GlobalKeys.BEACON_TYPE_B5_CONNECTED)) {
             if (boolMakeHeaderVisible) {
-                rLBeaconB4DataLoggingHeader.setBackgroundColor(mActivity.getResources().getColor(R.color.yellow_70));
-                rLBeaconB4DataLoggingHeader.setVisibility(View.VISIBLE);
+                rLBeaconB5DataLoggingHeader.setBackgroundColor(mActivity.getResources().getColor(R.color.yellow_70));
+                rLBeaconB5DataLoggingHeader.setVisibility(View.VISIBLE);
                 mRlGroupInfoLayout.setVisibility(View.VISIBLE);
                 mRlSpinnerLayout.setVisibility(View.GONE);
             } else {
-                rLBeaconB4DataLoggingHeader.setVisibility(View.GONE);
+                rLBeaconB5DataLoggingHeader.setVisibility(View.GONE);
                 mRlSpinnerLayout.setVisibility(View.VISIBLE);
                 mRlGroupInfoLayout.setVisibility(View.GONE);
             }
@@ -297,7 +301,6 @@ public class DataLoggingReadingActivity extends Activity {
     @Override
     public void onBackPressed() {
         if (!GlobalConstant.BOOL_IS_ANY_OPERATION_IN_PROCESS) {
-            boolInhibitSpinner = true;
 
             AndroidAppUtils.showLog(TAG, " boolIsGroupIndexShowing : " + boolIsGroupIndexShowing);
             /**
@@ -336,6 +339,8 @@ public class DataLoggingReadingActivity extends Activity {
                 GlobalConstant.BOOL_IS_NOTIFICATION_ALREADY_ENABLED = false;
                 GlobalConstant.BOOL_IS_DATA_LOGGING_READING_ACTIVITY_VISIBLE = false;
                 unRegisterAllListener();
+//                setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+
                 super.onBackPressed();
             }
         } else {
@@ -393,6 +398,7 @@ public class DataLoggingReadingActivity extends Activity {
         mTvErrorMessage.setVisibility(View.INVISIBLE);
         rLBeaconB1DataLoggingHeader = (RelativeLayout) findViewById(R.id.rLBeaconB1DataLoggingHeader);
         rLBeaconB4DataLoggingHeader = (RelativeLayout) findViewById(R.id.rLBeaconB4DataLoggingHeader);
+        rLBeaconB5DataLoggingHeader = (RelativeLayout) findViewById(R.id.rLBeaconB5DataLoggingHeader);
         mRlSpinnerLayout = (RelativeLayout) findViewById(R.id.rlSpinnerLayout);
         mtvStoredGroupIndexSelected = (TextView) findViewById(R.id.tvStoredGroupIndexSelected);
         mRlGroupInfoLayout = (RelativeLayout) findViewById(R.id.rlGroupInfoLayout);
@@ -424,7 +430,7 @@ public class DataLoggingReadingActivity extends Activity {
                                         TOTAL_NUMBER_RECORDS = GlobalConstant.TOTAL_RECORD_FOR_CURRENT_GROUP_SELECTED;
                                         AndroidAppUtils.showLog(TAG, "*************** strSelectedData ***************** " + strSelectedData.getStrGroupIndex());
                                         mProgressBar.setVisibility(View.VISIBLE);
-                                        mStrCurrentGroupIndex = strSelectedData.getStrGroupIndex();
+                                        intGroupIndexCurrentlyFetching = mStrCurrentGroupIndex = strSelectedData.getStrGroupIndex();
 
                                         /**
                                          * Set data information for currently selected group
@@ -520,7 +526,6 @@ public class DataLoggingReadingActivity extends Activity {
                                     intCurrentEnd + "")));
                     long longCurrentRecordEndTime = AndroidAppUtils.calculateTimeStamp(GlobalConstant.longGroupIndexTimeStamp,
                             intCurrentEnd + "");
-//                    int intDifferenceCountValue = intCurrentCount - intTotalRecordCount;
                     int intDifferenceCountValue = intTotalRecordCount;
                     int intCurrentRecordStartTime = intDifferenceCountValue * intStorageInterval;
                     AndroidAppUtils.showLog(TAG, "intCurrentRecordStartTime : " +
@@ -582,8 +587,6 @@ public class DataLoggingReadingActivity extends Activity {
                 boolIsPresentInCache = true;
 
             } else {
-//                mTvErrorMessage.setText("No Value in Cache");
-//                manageListVisibility(false);
                 AndroidAppUtils.showLog(TAG, " savedDataLoggingModelArrayList is null or size is zero");
             }
         }
@@ -610,7 +613,6 @@ public class DataLoggingReadingActivity extends Activity {
             mDataLoggingListAdapter.notifyDataSetChanged();
         }
         intCounter = 1;
-        boolIsRecordPacketWritingInProcess = false;
         mArrayListRecordByteArray = new ArrayList<>();
         mTvErrorMessage.setVisibility(View.INVISIBLE);
         GlobalConstant.BOOL_IS_NOTIFICATION_ALREADY_ENABLED = false;
@@ -714,151 +716,39 @@ public class DataLoggingReadingActivity extends Activity {
                         case GlobalKeys.DEVICE_CURRENT_INDEX_REQUEST:
                             AndroidAppUtils.hideProgressDialog();
                             mProgressBar.setVisibility(View.VISIBLE);
-                            /**
-                             * Disable Notification after receiving the first packet
-                             */
-                            if (checkReceiveValue(mByteDataReceived)) {
-                                /***
-                                 * Request made to retrieve current index of log from the device
-                                 */
-                                if (mByteDataReceived != null && mByteDataReceived.length > 0) {
-                                    AndroidAppUtils.showLog(TAG, "mFirstByteData length : " + mByteDataReceived.length);
-                                    AndroidAppUtils.IterateOverByteArray(mByteDataReceived);
-                                    GlobalConstant.longGroupIndexTimeStamp = System.currentTimeMillis();
-                                    byte[] mFirstByteDataIndex = new byte[2];
-                                    byte[] mTotalStoredRecords = new byte[2];
-                                    byte[] mCurrentTotalRecords = new byte[2];
-                                    for (int i = 0; i < mByteDataReceived.length; i++) {
-                                        if (i == 0 || i == 1) {
-                                            mFirstByteDataIndex[i] = mByteDataReceived[i];
-                                        } else if (i == 2 || i == 3) {
-                                            mTotalStoredRecords[i - 2] = mByteDataReceived[i];
-                                        } else if (i == 4 || i == 5) {
-                                            mCurrentTotalRecords[i - 4] = mByteDataReceived[i];
-                                        }
-                                    }
-                                    AndroidAppUtils.showLog(TAG, "mFirstByteDataIndex : " + AndroidAppUtils.convertToHexString(mFirstByteDataIndex) +
-                                            "\n" + "mTotalStoredRecords : " + AndroidAppUtils.convertToHexString(mTotalStoredRecords) +
-                                            "\n" + "mCurrentTotalRecords : " + AndroidAppUtils.convertToHexString(mCurrentTotalRecords));
-                                    AndroidAppUtils.showLog(TAG,
-                                            "mTotalStoredRecords : " + Integer.parseInt(AndroidAppUtils.convertToHexString(mTotalStoredRecords), 16) +
-                                                    "mCurrentTotalRecords using function  : " + Integer.parseInt(AndroidAppUtils.convertToHexString(mCurrentTotalRecords), 16));
-                                    GlobalConstant.TOTAL_STORED_RECORDS_ON_DEVICE = Integer.parseInt(AndroidAppUtils.convertToHexString(mCurrentTotalRecords), 16);
-                                    /**
-                                     * Deducting one from  GlobalConstant.TOTAL_STORED_RECORDS_ON_DEVICE as current counter received
-                                     * record is not being written on index received
-                                     */
-//                                    if (GlobalConstant.TOTAL_STORED_RECORDS_ON_DEVICE > 0) {
-//                                        GlobalConstant.TOTAL_STORED_RECORDS_ON_DEVICE -= 1;
-//                                    }
-                                    /**
-                                     * Current Group Index stored on which currently record writing is going on.
-                                     */
-                                    GlobalConstant.INT_CURRENT_GROUP_INDEX = Integer.parseInt(AndroidAppUtils.convertToHexString(mFirstByteDataIndex), 16);
-                                    /**
-                                     * If GlobalConstant.INT_CURRENT_GROUP_INDEX received is odd the deducting it by one as we need to
-                                     * read only even group
-                                     */
-//                                    if (GlobalConstant.INT_CURRENT_GROUP_INDEX > 0 && GlobalConstant.INT_CURRENT_GROUP_INDEX % 2 != 0) {
-//                                        GlobalConstant.INT_CURRENT_GROUP_INDEX -= 1;
-//                                    }
-                                    byteTemporaryCurrentGroupPacket = mByteDataReceived;
-                                    calculateTotalStoredGroupIndex(mFirstByteDataIndex);
-                                } else {
-                                    AndroidAppUtils.showLog(TAG, "mFirstByteData is null or mFirstByteData length is zero");
-                                }
-                            } else {
-                                /**
-                                 * Retrieve again value
-                                 */
-                                AndroidAppUtils.showLog(TAG, "Wrong packet picked or no group index found");
-                                showErrorMessageForWrongInvalidValue(mByteDataReceived, mActivity.getResources().getString(R.string.strDataLoggingNotStarted));
-                            }
+                            retrieveDataDeviceCurrentIndex(mByteDataReceived);
+
 
                             break;
 
                         case GlobalKeys.DEVICE_ALL_GROUP_INFORMATION_REQUEST:
-                            String strGroupGarbageValue = "00080004000d0000000000000000002013000100";//"00080004000d0000000000000000002013000100";
+                            String strGroupInValidValue = "00080004000d0000000000000000002013000100";
 
                             /**
                              * Check the beacon type connected and accordingly parse the group data
                              */
                             if (GlobalConstant.STRING_CURRENT_BEACON_TYPE_CONNECTED.equalsIgnoreCase(GlobalKeys.BEACON_TYPE_B1_CONNECTED)) {
-                                checkAndSaveGroupDataAccordingToBeaconType(7, mByteDataReceived, strGroupGarbageValue);
+                                checkAndSaveGroupDataAccordingToBeaconType(7, mByteDataReceived, strGroupInValidValue);
                             } else if (GlobalConstant.STRING_CURRENT_BEACON_TYPE_CONNECTED.equalsIgnoreCase(GlobalKeys.BEACON_TYPE_B4_CONNECTED)) {
-                                checkAndSaveGroupDataAccordingToBeaconType(10, mByteDataReceived, strGroupGarbageValue);
+                                checkAndSaveGroupDataAccordingToBeaconType(10, mByteDataReceived, strGroupInValidValue);
                             } else if (GlobalConstant.STRING_CURRENT_BEACON_TYPE_CONNECTED.equalsIgnoreCase(GlobalKeys.BEACON_TYPE_B5_CONNECTED)) {
-                                checkAndSaveGroupDataAccordingToBeaconType(10, mByteDataReceived, strGroupGarbageValue);
+                                checkAndSaveGroupDataAccordingToBeaconType(10, mByteDataReceived, strGroupInValidValue);
                             }
 
-                            /*if (!AndroidAppUtils.convertToHexString(mByteDataReceived).equalsIgnoreCase(strGroupGarbageValue) &&
-                                    !Arrays.equals(mByteOldChunkReceived, mByteDataReceived)) {
-                                mUnOrderedReceivedByteArray.add(mByteDataReceived);
-                                AndroidAppUtils.showInfoLog(TAG, "mUnOrderedReceivedByteArray size : " + mUnOrderedReceivedByteArray.size());
-                                int intTotalByteRequired = intGroupIndexTotalCount * 7;
-                                int intByteRemainder = intTotalByteRequired % 20;
-//                                int intByteRequiredForTwentyMultiple = 20 - intByteRemainder;
-//                                intTotalByteRequired = intTotalByteRequired + intByteRequiredForTwentyMultiple;
 
-
-                                AndroidAppUtils.showErrorLog(TAG, " Group intTotalByteRequired : " + intTotalByteRequired +
-                                        "\n mIntTotalByteReceived : " + mIntTotalByteReceived);
-                                if (mIntTotalByteReceived < intTotalByteRequired) {
-
-                                    if (!Arrays.equals(mByteOldChunkReceived, mByteDataReceived)) {
-                                        AndroidAppUtils.showInfoLog(TAG, "last byte data : " + AndroidAppUtils.convertToHexString(mByteDataReceived));
-                                        boolIsNewPacketRequired = false;
-                                        checkAndSetDataToGroupListView(mByteDataReceived, 7);
-                                        mByteOldChunkReceived = mByteDataReceived;
-                                        mIntTotalByteReceived += mByteDataReceived.length;//20;
-                                        if (mIntTotalByteReceived == intTotalByteRequired)
-                                            GlobalConstant.BOOL_IS_ANY_OPERATION_IN_PROCESS = false;
-                                    }
-                                } else if (mIntTotalByteReceived == intTotalByteRequired) {
-                                    //All record data received
-                                    GlobalConstant.BOOL_IS_ANY_OPERATION_IN_PROCESS = false;
-                                }
-                            }*/
                             break;
                         case GlobalKeys.DEVICE_NEXT_RECORD_FETCH_REQUEST:
-                            strGroupGarbageValue = "00080004000d0000000000000000002013000100";//"00080004000d0000000000000000002013000100";
+                            strGroupInValidValue = "00080004000d0000000000000000002013000100";
                             /**
                              * Check the beacon type connected and accordingly parse the group data
                              */
                             if (GlobalConstant.STRING_CURRENT_BEACON_TYPE_CONNECTED.equalsIgnoreCase(GlobalKeys.BEACON_TYPE_B1_CONNECTED)) {
-                                checkAndSaveRecordDataAccordingToBeaconType(7, mByteDataReceived, strGroupGarbageValue);
+                                checkAndSaveRecordDataAccordingToBeaconType(7, mByteDataReceived, strGroupInValidValue);
                             } else if (GlobalConstant.STRING_CURRENT_BEACON_TYPE_CONNECTED.equalsIgnoreCase(GlobalKeys.BEACON_TYPE_B4_CONNECTED)) {
-                                checkAndSaveRecordDataAccordingToBeaconType(10, mByteDataReceived, strGroupGarbageValue);
+                                checkAndSaveRecordDataAccordingToBeaconType(10, mByteDataReceived, strGroupInValidValue);
                             } else if (GlobalConstant.STRING_CURRENT_BEACON_TYPE_CONNECTED.equalsIgnoreCase(GlobalKeys.BEACON_TYPE_B5_CONNECTED)) {
-                                checkAndSaveRecordDataAccordingToBeaconType(10, mByteDataReceived, strGroupGarbageValue);
+                                checkAndSaveRecordDataAccordingToBeaconType(10, mByteDataReceived, strGroupInValidValue);
                             }
-                            /*if (!Arrays.equals(mByteOldChunkReceived, mByteDataReceived)) {
-                                mUnOrderedReceivedByteArray.add(mByteDataReceived);
-                                AndroidAppUtils.showInfoLog(TAG, "mUnOrderedReceivedByteArray size : " + mUnOrderedReceivedByteArray.size());
-                                int intTotalByteRequired = TOTAL_NUMBER_RECORDS * 7;
-                                int intByteRemainder = intTotalByteRequired % 20;
-//                                int intByteRequiredForTwentyMultiple = 20 - intByteRemainder;
-//                                intTotalByteRequired = intTotalByteRequired + intByteRequiredForTwentyMultiple;
-
-
-                                AndroidAppUtils.showErrorLog(TAG, " Record intTotalByteRequired : " + intTotalByteRequired +
-                                        "\n mIntTotalByteReceived : " + mIntTotalByteReceived);
-                                if (mIntTotalByteReceived < intTotalByteRequired) {
-
-                                    if (!Arrays.equals(mByteOldChunkReceived, mByteDataReceived)) {
-                                        AndroidAppUtils.showInfoLog(TAG, "last byte data : " + AndroidAppUtils.convertToHexString(mByteDataReceived));
-                                        boolIsNewPacketRequired = false;
-                                        checkAndSetDataToRecordListView(mByteDataReceived, 7);
-                                        mByteOldChunkReceived = mByteDataReceived;
-                                        mIntTotalByteReceived += mByteDataReceived.length;//20;
-                                        if (mIntTotalByteReceived == intTotalByteRequired)
-                                            GlobalConstant.BOOL_IS_ANY_OPERATION_IN_PROCESS = false;
-                                    }
-                                } else if (mIntTotalByteReceived == intTotalByteRequired) {
-                                    //All record data received
-                                    GlobalConstant.BOOL_IS_ANY_OPERATION_IN_PROCESS = false;
-                                }
-                            }*/
 
                             break;
 
@@ -953,73 +843,88 @@ public class DataLoggingReadingActivity extends Activity {
                     myCountDownTimer.stringGeneratedForActionOccurred(mActivity.getResources().getString(R.string.strDataLoggingNotStarted));
 
                 }
-               /* if (boolIsRecordPacketWritingInProcess) {
-                    AndroidAppUtils.showInfoLog(TAG, "intCounter : " + intCounter + " AndroidAppUtils.convertIntToHex(intCounter) : "
-                            + AndroidAppUtils.convertIntToHex(intCounter) +
-                            "\n TOTAL_NUMBER_RECORDS :  " + TOTAL_NUMBER_RECORDS);
-                    if (intCounter <= TOTAL_NUMBER_RECORDS) {
-                        AndroidAppUtils.showLog(TAG, "intGroupIndexCurrentlyFetching : " + intGroupIndexCurrentlyFetching);
-                        final byte byteRecordIndexData[];
-                        *//**
-                 * Handling the case for disconnect and failure
-                 *//*
-                        GlobalConstant.INT_CURRENT_GROUP_INDEX_BEFORE_FAIL = Integer.parseInt(intGroupIndexCurrentlyFetching, 16);
-                        *//**
-                 * Since request for current record is send so deduct it by one
-                 * so current counter request will be send
-                 *//*
-                        if (intCounter == 1) {
-                            intCounter = 2;
-                        }
-                        GlobalConstant.INT_CURRENT_RECORD_INDEX_BEFORE_FAIL = intCounter - 1;
-                        AndroidAppUtils.showInfoLog(TAG, "  GlobalConstant.INT_CURRENT_RECORD_INDEX_BEFORE_FAIL : " + GlobalConstant.INT_CURRENT_RECORD_INDEX_BEFORE_FAIL
-                                + "\n GlobalConstant.INT_CURRENT_GROUP_INDEX_BEFORE_FAIL : " + GlobalConstant.INT_CURRENT_GROUP_INDEX_BEFORE_FAIL);
-                        byte[] mStrGroupIndexData = AndroidAppUtils.verifyForMoreThanTwoDigit(AndroidAppUtils.appendNoOfZeroIfRequired(intGroupIndexCurrentlyFetching));
-                        byte[] byteRecordInnerCurrentIndex = AndroidAppUtils.verifyForMoreThanTwoDigit(AndroidAppUtils.appendNoOfZeroIfRequired(AndroidAppUtils.convertIntToHex(intCounter)));
-                        byteRecordIndexData = new byte[mStrGroupIndexData.length + byteRecordInnerCurrentIndex.length];
-                        System.arraycopy(mStrGroupIndexData, 0, byteRecordIndexData, 0, mStrGroupIndexData.length);
-                        System.arraycopy(byteRecordInnerCurrentIndex, 0, byteRecordIndexData, mStrGroupIndexData.length, byteRecordInnerCurrentIndex.length);
-                        new Handler(Looper.getMainLooper()).postDelayed(new Runnable() {
-                            @Override
-                            public void run() {
-                                DeviceAdapter.mConnectionControl.writeToDevice(ConnectionControl.dl_write_characteristics, byteRecordIndexData);
-                                intRestartingRecordDelay = 1;
-                            }
-                        }, intRestartingRecordDelay);
-                        strCurrentRequestType = GlobalKeys.DEVICE_NEXT_RECORD_FETCH_REQUEST;
-                        intCounter++;
-                    }
-                } else {
-//                    boolIsRecordPacketWritingInProcess = false;
-                    AndroidAppUtils.showLog(TAG, " Not Record Fetching request : " + boolIsRecordPacketWritingInProcess);
-                }*/
-               /* if (boolIsToGroupReadingInProcess) {
-                    boolIsGroupIndexWriteSuccess = true;
-                    AndroidAppUtils.showLog(TAG, "intGroupIndexTimeStampCount : " + intGroupIndexTimeStampCount +
-                            "\n intGroupIndexTotalCount : " + intGroupIndexTotalCount);
-                    if (intGroupIndexTimeStampCount < intGroupIndexTotalCount) {
-                        if (mStoredGroupIndex != null && mStoredGroupIndex.size() > 0) {
-                            GlobalConstant.INT_CURRENT_GROUP_INDEX_REQUEST_BEFORE_FAIL = intGroupIndexTimeStampCount - 1;
-                            GroupIndexModel groupIndexModel = mStoredGroupIndex.get(intGroupIndexTimeStampCount);
-                            GlobalConstant.RECORD_NEED_TO_BE_RECEIVE = mStoredGroupIndex.get(intGroupIndexTimeStampCount - 1).getStrGroupIndex();
-                            AndroidAppUtils.showLog(TAG, "groupIndexModel.getStrGroupIndex() : " + groupIndexModel.getStrGroupIndex());
-                            retrieveDataAccordingToGroupIndexSelected(groupIndexModel.getStrGroupIndex(), (GlobalConstant.ONE_SECOND_DELAY_DURATION * 1));
-                            intGroupIndexTimeStampCount = intGroupIndexTimeStampCount + 1;
-                        }
-                    } else {
-                        //Check for last index that need to retrieved to make total record on device available
-                        GlobalConstant.RECORD_NEED_TO_BE_RECEIVE = mStoredGroupIndex.get(intGroupIndexTimeStampCount - 1).getStrGroupIndex();
-                    }
-                } else {
-//                    boolIsToGroupReadingInProcess = false;
-                    AndroidAppUtils.showLog(TAG, " Not Group Fetching request : " + boolIsToGroupReadingInProcess);
-                }*/
-
-
             }
 
 
         };
+    }
+
+    /**
+     * Method Name : retrieveDataDeviceCurrentIndex
+     * Description : This method is used for retrieving the current running index data
+     *
+     * @param mByteDataReceived
+     */
+    private void retrieveDataDeviceCurrentIndex(byte[] mByteDataReceived) {
+        /**
+         * Disable Notification after receiving the first packet
+         */
+        if (checkReceiveValue(mByteDataReceived)) {
+            /***
+             * Request made to retrieve current index of log from the device
+             */
+            if (mByteDataReceived != null && mByteDataReceived.length > 0) {
+                AndroidAppUtils.showLog(TAG, "mFirstByteData length : " + mByteDataReceived.length);
+                AndroidAppUtils.IterateOverByteArray(mByteDataReceived);
+                GlobalConstant.longGroupIndexTimeStamp = System.currentTimeMillis();
+                byte[] mFirstByteDataIndex = new byte[2];
+                byte[] mTotalStoredRecords = new byte[2];
+                byte[] mCurrentTotalRecords = new byte[2];
+                byte[] mCurrentRollBackIndex = new byte[1];
+                for (int i = 0; i < mByteDataReceived.length; i++) {
+                    if (i == 0 || i == 1) {
+                        mFirstByteDataIndex[i] = mByteDataReceived[i];
+                    } else if (i == 2 || i == 3) {
+                        mTotalStoredRecords[i - 2] = mByteDataReceived[i];
+                    } else if (i == 4 || i == 5) {
+                        mCurrentTotalRecords[i - 4] = mByteDataReceived[i];
+                    } else if (i == 6) {
+                        mCurrentRollBackIndex[i - 6] = mByteDataReceived[i];
+                    }
+                }
+                AndroidAppUtils.showLog(TAG, "mFirstByteDataIndex : " + AndroidAppUtils.convertToHexString(mFirstByteDataIndex) +
+                        "\n" + "mTotalStoredRecords : " + AndroidAppUtils.convertToHexString(mTotalStoredRecords) +
+                        "\n" + "mCurrentTotalRecords : " + AndroidAppUtils.convertToHexString(mCurrentTotalRecords) +
+                        "\n" + "mCurrentRollBackIndex : " + AndroidAppUtils.convertToHexString(mCurrentRollBackIndex));
+                AndroidAppUtils.showLog(TAG,
+                        "mTotalStoredRecords : " + Integer.parseInt(AndroidAppUtils.convertToHexString(mTotalStoredRecords), 16) +
+                                "mCurrentTotalRecords using function  : " + Integer.parseInt(AndroidAppUtils.convertToHexString(mCurrentTotalRecords), 16));
+                GlobalConstant.TOTAL_STORED_RECORDS_ON_DEVICE = Integer.parseInt(AndroidAppUtils.convertToHexString(mCurrentTotalRecords), 16);
+                GlobalConstant.CURRENT_ROLL_BACK_INDEX = Integer.parseInt(AndroidAppUtils.convertToHexString(mCurrentRollBackIndex), 16);
+                /**
+                 * Deducting one from  GlobalConstant.TOTAL_STORED_RECORDS_ON_DEVICE as current counter received
+                 * record is not being written on index received
+                 */
+//                                    if (GlobalConstant.TOTAL_STORED_RECORDS_ON_DEVICE > 0) {
+//                                        GlobalConstant.TOTAL_STORED_RECORDS_ON_DEVICE -= 1;
+//                                    }
+                /**
+                 * Current Group Index stored on which currently record writing is going on.
+                 */
+                GlobalConstant.INT_CURRENT_GROUP_INDEX = Integer.parseInt(AndroidAppUtils.convertToHexString(mFirstByteDataIndex), 16);
+                /**
+                 * If GlobalConstant.INT_CURRENT_GROUP_INDEX received is odd the deducting it by one as we need to
+                 * read only even group
+                 */
+//                                    if (GlobalConstant.INT_CURRENT_GROUP_INDEX > 0 && GlobalConstant.INT_CURRENT_GROUP_INDEX % 2 != 0) {
+//                                        GlobalConstant.INT_CURRENT_GROUP_INDEX -= 1;
+//                                    }
+                byteTemporaryCurrentGroupPacket = mByteDataReceived;
+                mGroupIndexModel = new GroupIndexModel();
+                mGroupIndexModel.setStrGroupIndex(Integer.parseInt(AndroidAppUtils.convertToHexString(mFirstByteDataIndex), 16) + "");
+                mGroupIndexModel.setStrGroupTotalRecord((Integer.parseInt(AndroidAppUtils.convertToHexString(mTotalStoredRecords), 16) - 1) + "");
+                mGroupIndexModel.setStrCurrentCounter(Integer.parseInt(AndroidAppUtils.convertToHexString(mCurrentTotalRecords), 16) + "");
+                calculateTotalStoredGroupIndex(mFirstByteDataIndex);
+            } else {
+                AndroidAppUtils.showLog(TAG, "mFirstByteData is null or mFirstByteData length is zero");
+            }
+        } else {
+            /**
+             * Retrieve again value
+             */
+            AndroidAppUtils.showLog(TAG, "Wrong packet picked or no group index found");
+            showErrorMessageForWrongInvalidValue(mByteDataReceived, mActivity.getResources().getString(R.string.strDataLoggingNotStarted));
+        }
     }
 
     /**
@@ -1093,6 +998,7 @@ public class DataLoggingReadingActivity extends Activity {
                     mIntTotalByteReceived += mByteDataReceived.length;//20;
                     if (mIntTotalByteReceived == intTotalByteRequired)
                         GlobalConstant.BOOL_IS_ANY_OPERATION_IN_PROCESS = false;
+
                 }
             } else if (mIntTotalByteReceived == intTotalByteRequired) {
                 //All record data received
@@ -1156,10 +1062,7 @@ public class DataLoggingReadingActivity extends Activity {
                         System.arraycopy(mByteDataReceived, intGroupBytePacketDivisionIndex, byteRemainingGroup, 0, intGroupRemainder);
                         intGroupBytePacketDivisionIndex = 0;
                         boolIsNewPacketRequired = true;
-                    }  /*else if (mByteDataReceived.length % intBytePacketLength == 0) {
-                        //When partition value is 10 then third packet start index should be zero
-                        intGroupBytePacketDivisionIndex = 0;
-                    }*/ else {
+                    } else {
                         intGroupRemainder = intBytePacketLength;
                     }
                 }
@@ -1211,12 +1114,18 @@ public class DataLoggingReadingActivity extends Activity {
                             "\n intStartIndexAfterRemainingByte : " + intStartIndexAfterRemainingByte);
                     System.arraycopy(mByteDataReceived, intRecordBytePacketDivisionIndex, byteRecordArray, intStartIndexAfterRemainingByte, intRemainder);
                     if (mIntTotalByteSaved <= TOTAL_NUMBER_RECORDS * intBytePacketLength) {
-                        if (GlobalConstant.STRING_CURRENT_BEACON_TYPE_CONNECTED.equalsIgnoreCase(GlobalKeys.BEACON_TYPE_B1_CONNECTED))
-                            saveBeaconB1DataLoggingData(byteRecordArray);
-                        else if (GlobalConstant.STRING_CURRENT_BEACON_TYPE_CONNECTED.equalsIgnoreCase(GlobalKeys.BEACON_TYPE_B4_CONNECTED))
-                            saveBeaconB4DataLoggingData(byteRecordArray);
-                        else if (GlobalConstant.STRING_CURRENT_BEACON_TYPE_CONNECTED.equalsIgnoreCase(GlobalKeys.BEACON_TYPE_B5_CONNECTED))
-                            saveBeaconB4DataLoggingData(byteRecordArray);
+
+                        switch (GlobalConstant.STRING_CURRENT_BEACON_TYPE_CONNECTED) {
+                            case GlobalKeys.BEACON_TYPE_B1_CONNECTED:
+                                saveBeaconB1DataLoggingData(byteRecordArray);
+                                break;
+                            case GlobalKeys.BEACON_TYPE_B4_CONNECTED:
+                                saveBeaconB4DataLoggingData(byteRecordArray);
+                                break;
+                            case GlobalKeys.BEACON_TYPE_B5_CONNECTED:
+                                saveBeaconB5DataLoggingData(byteRecordArray);
+                                break;
+                        }
                     }
                     intRecordBytePacketDivisionIndex += intRemainder;
                     if (intRemainder < intBytePacketLength) {
@@ -1347,12 +1256,16 @@ public class DataLoggingReadingActivity extends Activity {
         if (arrayListRecordByteArray != null && arrayListRecordByteArray.size() > 0) {
             for (String strHexByteData : arrayListRecordByteArray) {
                 byte[] mByteData = AndroidAppUtils.hexStringToByteArray(strHexByteData);
-                if (GlobalConstant.STRING_CURRENT_BEACON_TYPE_CONNECTED.equalsIgnoreCase(GlobalKeys.BEACON_TYPE_B1_CONNECTED)) {
-                    saveBeaconB1DataLoggingData(mByteData);
-                } else if (GlobalConstant.STRING_CURRENT_BEACON_TYPE_CONNECTED.equalsIgnoreCase(GlobalKeys.BEACON_TYPE_B4_CONNECTED)) {
-                    saveBeaconB4DataLoggingData(mByteData);
-                } else if (GlobalConstant.STRING_CURRENT_BEACON_TYPE_CONNECTED.equalsIgnoreCase(GlobalKeys.BEACON_TYPE_B5_CONNECTED)) {
-                    saveBeaconB4DataLoggingData(mByteData);
+                switch (GlobalConstant.STRING_CURRENT_BEACON_TYPE_CONNECTED) {
+                    case GlobalKeys.BEACON_TYPE_B1_CONNECTED:
+                        saveBeaconB1DataLoggingData(mByteData);
+                        break;
+                    case GlobalKeys.BEACON_TYPE_B4_CONNECTED:
+                        saveBeaconB4DataLoggingData(mByteData);
+                        break;
+                    case GlobalKeys.BEACON_TYPE_B5_CONNECTED:
+                        saveBeaconB5DataLoggingData(mByteData);
+                        break;
                 }
             }
             //Save logging corresponding to index selected
@@ -1439,7 +1352,7 @@ public class DataLoggingReadingActivity extends Activity {
                 }
             }
             if (verifyForCorrectGroupRecordInformation(mByteGroupIndexFetchedFromDevice)) {
-                intGroupIndexCurrentlyFetching = AndroidAppUtils.convertToHexString(mByteGroupIndexFetchedFromDevice);
+//                intGroupIndexCurrentlyFetching = AndroidAppUtils.convertToHexString(mByteGroupIndexFetchedFromDevice);
                 byte[] byteGroupIndexData = AndroidAppUtils.verifyForMoreThanTwoDigit(AndroidAppUtils.appendNoOfZeroIfRequired(AndroidAppUtils.convertToHexString(mByteGroupIndexFetchedFromDevice)));
                 String strRecordCurrentIndex = "";
                 int intGroupIndex = Integer.parseInt(AndroidAppUtils.convertToHexString(mByteGroupIndexFetchedFromDevice), 16);
@@ -1478,12 +1391,23 @@ public class DataLoggingReadingActivity extends Activity {
                             mProgressBar.setVisibility(View.GONE);
                             intNextGroupDataNeedToReceive += 1;
                             addGroupIndex(groupIndexModel);
+                            /**
+                             * When size of list is equal to one decremented value of total group
+                             * required then add the current running group data to the list
+                             */
+                            if (mGroupIndexHexData.size() == intGroupIndexTotalCount - 1) {
+                                if (!mGroupIndexHexData.contains(mGroupIndexModel)) {
+                                    addGroupIndex(mGroupIndexModel);
+                                }
+                            }
+
                         } else if (mGroupIndexHexData.size() == intGroupIndexTotalCount) {
                             mProgressBar.setVisibility(View.GONE);
                             setDataOnGroupIndexListView();
                             if (GlobalConstant.BOOL_IS_NOTIFICATION_ALREADY_ENABLED)
                                 enableDisableNotification(false);
                             boolIsToGroupReadingInProcess = false;
+
                             GlobalConstant.BOOL_READING_TYPE_IN_PROCESS = "";
                             GlobalConstant.BOOL_IS_ANY_OPERATION_IN_PROCESS = false;
                         } else if (mGroupIndexHexData.size() > 0) {
@@ -1548,7 +1472,7 @@ public class DataLoggingReadingActivity extends Activity {
                 }
             }
             if (verifyForCorrectGroupRecord(mByteGroupIndexFetchedFromDevice)) {
-                intGroupIndexCurrentlyFetching = AndroidAppUtils.convertToHexString(mByteGroupIndexFetchedFromDevice);
+//                intGroupIndexCurrentlyFetching = AndroidAppUtils.convertToHexString(mByteGroupIndexFetchedFromDevice);
                 byte[] byteGroupIndexData = AndroidAppUtils.verifyForMoreThanTwoDigit(AndroidAppUtils.appendNoOfZeroIfRequired(AndroidAppUtils.convertToHexString(mByteGroupIndexFetchedFromDevice)));
 //                byte[] byteGroupIndexData = {(byte) 0x00, (byte) 0x0c};
                 String strRecordCurrentIndex = "";
@@ -1587,12 +1511,17 @@ public class DataLoggingReadingActivity extends Activity {
                         if (mGroupIndexHexData.size() < intGroupIndexTotalCount) {
                             mProgressBar.setVisibility(View.GONE);
                             addGroupIndex(groupIndexModel);
+
                         } else if (mGroupIndexHexData.size() == intGroupIndexTotalCount) {
                             mProgressBar.setVisibility(View.GONE);
-                            setDataOnGroupIndexListView();
+
                             if (GlobalConstant.BOOL_IS_NOTIFICATION_ALREADY_ENABLED)
                                 enableDisableNotification(false);
+
                             boolIsToGroupReadingInProcess = false;
+                            if (!mGroupIndexHexData.contains(mGroupIndexModel))
+                                mGroupIndexHexData.add(mGroupIndexModel);
+                            setDataOnGroupIndexListView();
                             GlobalConstant.BOOL_READING_TYPE_IN_PROCESS = "";
                             GlobalConstant.BOOL_IS_ANY_OPERATION_IN_PROCESS = false;
                         } else if (mGroupIndexHexData.size() > 0) {
@@ -1628,7 +1557,6 @@ public class DataLoggingReadingActivity extends Activity {
                             @Override
                             public void run() {
                                 mArrayListRecordByteArray = new ArrayList<>();
-                                boolIsRecordPacketWritingInProcess = true;
                                 DeviceAdapter.mConnectionControl.writeToDevice(ConnectionControl.dl_write_characteristics, byteRecordIndexData);
                             }
                         }, 1/*1000*/);
@@ -1739,40 +1667,7 @@ public class DataLoggingReadingActivity extends Activity {
      */
     private void setUpSpinnerItem(int intTotalStoredGroupIndexes, int intCurrentlyRunningIndex) {
         intGroupIndexTotalCount = checkGroupCount(intTotalStoredGroupIndexes, intCurrentlyRunningIndex);
-      /*  *//**
-         * When total number of records are even
-         *//*
-        if (intTotalStoredGroupIndexes % 2 == 0) {
-            intGroupIndexTotalCount = checkForCurrentIndex(intTotalStoredGroupIndexes, intCurrentlyRunningIndex);
-            int j = 0;
-            for (int i = 0; i < intGroupIndexTotalCount; i++) {
-                GroupIndexModel groupIndexModel = new GroupIndexModel();
-                groupIndexModel.setStrGroupIndex(j + 2 + "");
-                mStoredGroupIndex.add(groupIndexModel);
-                j = j + 2;
-            }
 
-        }
-        *//**
-         * When total number of records are odd
-         *//*
-        else {
-            *//**
-         * Need when we have only one group record on device for temporary purpose
-         *//*
-//            if (intTotalStoredGroupIndexes == 1) {
-//                intTotalStoredGroupIndexes = 3;
-//            }
-//            intGroupIndexTotalCount = (intTotalStoredGroupIndexes - 1) / 2;
-            intGroupIndexTotalCount = checkForCurrentIndex(intTotalStoredGroupIndexes, intCurrentlyRunningIndex);
-            int j = 0;
-            for (int i = 0; i < intGroupIndexTotalCount; i++) {
-                GroupIndexModel groupIndexModel = new GroupIndexModel();
-                groupIndexModel.setStrGroupIndex(j + 2 + "");
-                mStoredGroupIndex.add(groupIndexModel);
-                j = j + 2;
-            }
-        }*/
         for (int i = 0; i < mStoredGroupIndex.size(); i++) {
             AndroidAppUtils.showInfoLog(TAG, "index : " + mStoredGroupIndex.get(i).getStrGroupIndex());
         }
@@ -1810,55 +1705,55 @@ public class DataLoggingReadingActivity extends Activity {
         else {
             myCountDownTimer.stringGeneratedForActionOccurred(mActivity.getResources().getString(R.string.strDataLoggingStarted));
             myCountDownTimer.cancel();
-            if (intGroupIndexTimeStampCount < intGroupIndexTotalCount) {
-                if (mStoredGroupIndex != null && mStoredGroupIndex.size() > 0) {
-                    boolIsToGroupReadingInProcess = true;
-                    GroupIndexModel groupIndexModel = mStoredGroupIndex.get(intGroupIndexTimeStampCount);
-                    GlobalConstant.RECORD_NEED_TO_BE_RECEIVE = groupIndexModel.getStrGroupIndex();
-                    AndroidAppUtils.showLog(TAG, "groupIndexModel.getStrGroupIndex() : " + groupIndexModel.getStrGroupIndex());
-                    retrieveDataAccordingToGroupIndexSelected(groupIndexModel.getStrGroupIndex(), (GlobalConstant.ONE_SECOND_DELAY_DURATION * 1));
-                    intGroupIndexTimeStampCount = intGroupIndexTimeStampCount + 1;
+            /**
+             * If currently writting group index is 5X1 then only group is formed.
+             * Dont send 1X1 request as only one group.
+             * Set and Dispaly data for current group i.e 5X1
+             */
+            if (intGroupIndexTotalCount == 1) {
+                addGroupIndex(mGroupIndexModel);
+                mProgressBar.setVisibility(View.GONE);
+                GlobalConstant.BOOL_IS_ANY_OPERATION_IN_PROCESS = false;
+            }
+            /**
+             * More then one group has been formed .
+             * Send request for 1X1 to retrieve data for remaining group except for group data
+             * fetched from 3X1
+             */
+            else {
+                if (intGroupIndexTimeStampCount < intGroupIndexTotalCount) {
+                    if (mStoredGroupIndex != null && mStoredGroupIndex.size() > 0) {
+                        boolIsToGroupReadingInProcess = true;
+                        GroupIndexModel groupIndexModel = mStoredGroupIndex.get(intGroupIndexTimeStampCount);
+                        GlobalConstant.RECORD_NEED_TO_BE_RECEIVE = groupIndexModel.getStrGroupIndex();
+                        AndroidAppUtils.showLog(TAG, "groupIndexModel.getStrGroupIndex() : " + groupIndexModel.getStrGroupIndex());
+                        retrieveDataAccordingToGroupIndexSelected(groupIndexModel.getStrGroupIndex(), (GlobalConstant.ONE_SECOND_DELAY_DURATION * 2));
+                        intGroupIndexTimeStampCount = intGroupIndexTimeStampCount + 1;
+                    }
                 }
             }
         }
     }
 
+    /**
+     * Method Name : checkGroupCount
+     * Description : This method is used for getting the total number of group conut
+     *
+     * @param intTotalStoredGroupIndexes
+     * @param intCurrentlyRunningIndex
+     * @return
+     */
     private int checkGroupCount(int intTotalStoredGroupIndexes, int intCurrentlyRunningIndex) {
         int intTotalGroupRecordNeedToFetch = 0;
         if (intTotalStoredGroupIndexes == 0)
             return intTotalGroupRecordNeedToFetch;
         else
             intTotalGroupRecordNeedToFetch = intTotalStoredGroupIndexes;
-//        if (intCurrentlyRunningIndex % 2 == 0) {
-//            intTotalGroupRecordNeedToFetch = (intTotalStoredGroupIndexes / 2)-1;
-//        } else if (intCurrentlyRunningIndex % 2 != 0) {
-//            intTotalGroupRecordNeedToFetch = (intTotalStoredGroupIndexes - 1) / 2;
-//        }
         GroupIndexModel mGroupIndexModel = new GroupIndexModel();
-        mGroupIndexModel.setStrGroupIndex("1");
+        mGroupIndexModel.setStrGroupIndex(AppHelper.NUMBER_ONE);
         mStoredGroupIndex.add(mGroupIndexModel);
         return intTotalGroupRecordNeedToFetch;
     }
-
-    /**
-     * Method Name : checkForCurrentIndex
-     * Description : This method is used to check for the correct group index that need to fecthed
-     *
-     * @param intGroupIndexTotalCount
-     * @param intCurrentlyRunningIndex
-     * @return
-     */
-    private int checkForCurrentIndex(int intGroupIndexTotalCount, int intCurrentlyRunningIndex) {
-        int intTotalGroupRecordNeedToFetch = 0;
-
-        if (intCurrentlyRunningIndex % 2 == 0) {
-            intTotalGroupRecordNeedToFetch = intGroupIndexTotalCount / 2 - 1;
-        } else if (intCurrentlyRunningIndex % 2 != 0) {
-            intTotalGroupRecordNeedToFetch = (intGroupIndexTotalCount - 1) / 2;
-        }
-        return intTotalGroupRecordNeedToFetch;
-    }
-
 
     /**
      * Method Name : setDataOnGroupIndexListView
@@ -1950,7 +1845,7 @@ public class DataLoggingReadingActivity extends Activity {
             return true;
         } else {
             AndroidAppUtils.showLog(TAG, " Device Mac Address : " + GlobalConstant.DEVICE_MAC);
-            BluetoothDevice bluetoothDevice = GlobalConstant.mBluetoothAdapter.getRemoteDevice(GlobalConstant.DEVICE_MAC);
+            BluetoothDevice bluetoothDevice = GlobalConstant.mBluetoothAdapter != null ? GlobalConstant.mBluetoothAdapter.getRemoteDevice(GlobalConstant.DEVICE_MAC) : BluetoothAdapter.getDefaultAdapter().getRemoteDevice(GlobalConstant.DEVICE_MAC);
             DeviceAdapter.mConnectionControl = new ConnectionControl(ConnectionControl.connectionControl.mActivity, bluetoothDevice, mActivity);
             strCurrentRequestType = GlobalKeys.DEVICE_CURRENT_INDEX_REQUEST;
             return false;
@@ -1990,13 +1885,15 @@ public class DataLoggingReadingActivity extends Activity {
                     intConnectionStatus = (int) (bluetoothData[0]);
                     if (intConnectionStatus == GlobalConstant.STATUS_CODE_0
                             || intConnectionStatus == GlobalConstant.STATUS_CODE_8
-                            || intConnectionStatus == GlobalConstant.STATUS_CODE_133) {
+                            || intConnectionStatus == GlobalConstant.STATUS_CODE_133
+                            || intConnectionStatus == GlobalConstant.STATUS_CODE_14) {
                         unRegisterAllListener();
                         GlobalConstant.BOOL_IS_ANY_OPERATION_IN_PROCESS = false;
                         if (intRetryCountForEstablishingConnection < 2) {
                             /**
                              * Retry for connection
                              */
+                            AndroidAppUtils.dismissGradientDialog();
                             AndroidAppUtils.customAlertDialogWithGradiantBtn(mActivity, mActivity.getResources().getString(R.string.strWarningCaption), true, getString(R.string.strConnectionBrakeMessage)
                                     ,
                                     true, mActivity.getResources().getString(R.string.strRetryCaption), true, new ChoiceDialogClickListener() {
@@ -2047,7 +1944,7 @@ public class DataLoggingReadingActivity extends Activity {
                 AndroidAppUtils.showInfoLog(TAG, " *********** onGattServiceDiscovery ***********");
                 intRetryCountForEstablishingConnection = 0;
                 mProgressBar.setVisibility(View.INVISIBLE);
-                if (boolIsRecordPacketWritingInProcess || GlobalConstant.BOOL_READING_TYPE_IN_PROCESS.equalsIgnoreCase(GlobalKeys.OPERATION_TYPE_RECORD_READING)) {
+                if (GlobalConstant.BOOL_READING_TYPE_IN_PROCESS.equalsIgnoreCase(GlobalKeys.OPERATION_TYPE_RECORD_READING)) {
                     AndroidAppUtils.showLog(TAG, " GlobalConstant.INT_CURRENT_RECORD_INDEX_BEFORE_FAIL : "
                             + GlobalConstant.INT_CURRENT_RECORD_INDEX_BEFORE_FAIL + "\n TOTAL_NUMBER_RECORDS :  " + TOTAL_NUMBER_RECORDS);
                     AndroidAppUtils.showInfoLog(TAG, "intCounter : " + intCounter +
@@ -2068,7 +1965,6 @@ public class DataLoggingReadingActivity extends Activity {
                         new Handler(Looper.getMainLooper()).postDelayed(new Runnable() {
                             @Override
                             public void run() {
-                                boolIsRecordPacketWritingInProcess = true;
                                 DeviceAdapter.mConnectionControl.writeToDevice(ConnectionControl.dl_write_characteristics, byteRecordIndexData);
                             }
                         }, 1000);
@@ -2240,55 +2136,7 @@ public class DataLoggingReadingActivity extends Activity {
                         break;
 
                 }
-               /* if (i == 3) {
-                    byteData = byteDataReceived[i];
-                    AndroidAppUtils.showLog(TAG, " HEX LSB TEM : " + (byteData & 0xff));
-                    strLsbTemp = (byteData & 0xff) + "";
-                    dataLoggingModel.setStrLsbTemperature(strLsbTemp);
-                } else if (i == 2) {
-                    byteData = byteDataReceived[i];
-                    AndroidAppUtils.showLog(TAG, " HEX RSB TEM : " + (byteData & 0xff));
-                    strRsbTemp = (byteData & 0xff) + "";
-                    dataLoggingModel.setStrRsbTemperature(strRsbTemp);
-                } else if (i == 4) {
-                    byteData = byteDataReceived[i];
-                    AndroidAppUtils.showLog(TAG, " Battery Weeks : " + (byteData & 0xff));
-                    dataLoggingModel.setStrBatteryLife((byteData & 0xff) + "");
-                } else if (i == 5) {
-                    byteData = byteDataReceived[i];
-                    AndroidAppUtils.showLog(TAG, " Light Intensity : " + (byteData & 0xff));
 
-                    int num = (byteData & 0xff);
-                    AndroidAppUtils.showLog(TAG, "num : " + num + "   BINARY : " + Integer.toBinaryString(num));
-                    String strBinaryData = Integer.toBinaryString(num);
-                    strBinaryData = appendZeroToMakeEightBit(strBinaryData);
-                    char[] strTempArray = strBinaryData.toCharArray();
-                    String strLightValue = strBinaryData;
-                    if (strTempArray != null && strTempArray.length > 0) {
-                        if (strTempArray.length == 8 && strTempArray[0] == '1') {
-                            AndroidAppUtils.showLog(TAG, "Is Light Ambient Sensor");
-                        } else {
-                            AndroidAppUtils.showLog(TAG, "Is Not Light Ambient Sensor");
-                        }
-                        if (!strLightValue.isEmpty()) {
-                            dataLoggingModel.setStrTemper(strTempArray[0] + "");
-                            AndroidAppUtils.showLog(TAG, "Before Value : " + strLightValue + " converted value : " + Integer.parseInt(strLightValue, 2));
-                            strLightValue = strLightValue.substring(1, strLightValue.length());
-                            AndroidAppUtils.showLog(TAG, "After Value : " + strLightValue + " converted value : " + (!strLightValue.isEmpty() ? Integer.parseInt(strLightValue, 2) : "00"));
-                            dataLoggingModel.setStrLightIntensity(!strLightValue.isEmpty() ? Integer.parseInt(strLightValue, 2) + "" : "00");
-                        }
-
-                    } else {
-                        AndroidAppUtils.showLog(TAG, "strTempArray is null or size is zero");
-                    }
-                } else if (i == 1) {
-                    byteLogIndex[i] = byteDataReceived[i];
-                    AndroidAppUtils.showLog(TAG, " byteLogIndex : " + AndroidAppUtils.convertToHexString(byteLogIndex));
-                    AndroidAppUtils.showLog(TAG, "Log Index : " + Integer.parseInt(AndroidAppUtils.convertToHexString(byteLogIndex), 16));
-                    dataLoggingModel.setStrDataLogIndex(Integer.parseInt(AndroidAppUtils.convertToHexString(byteLogIndex), 16) + "");
-                } else if (i == 0) {
-                    byteLogIndex[i] = byteDataReceived[i];
-                }*/
             }
 
             if (!dataLoggingModelArrayList.contains(dataLoggingModel)) {
@@ -2326,7 +2174,6 @@ public class DataLoggingReadingActivity extends Activity {
      *
      * @param byteDataReceived
      */
-
     @RequiresApi(api = Build.VERSION_CODES.KITKAT)
     private void saveBeaconB4DataLoggingData(byte[] byteDataReceived) {
         byte byteData;
@@ -2346,11 +2193,21 @@ public class DataLoggingReadingActivity extends Activity {
                         break;
                     case 1:
                         byteLogIndex[i] = byteDataReceived[i];
-                        AndroidAppUtils.showLog(TAG, " byteLogIndex : " + AndroidAppUtils.convertToHexString(byteLogIndex));
-                        String strStartIndex = AndroidAppUtils.byteArrayCheckZero(byteLogIndex) ? AppHelper.NUMBER_ZERO : AndroidAppUtils.removeTrailingZeros(AndroidAppUtils.convertToHexString(byteLogIndex));
-                        AndroidAppUtils.showLog(TAG, "Log Index : " + strStartIndex);
 
-                        dataLoggingModel.setStrDataLogIndex(Integer.parseInt(strStartIndex.isEmpty() ? AppHelper.NUMBER_ZERO : strStartIndex, 16) + "");
+                        int intLogIndex = Integer.parseInt(AndroidAppUtils.convertToHexString(byteLogIndex), 16);
+                        AndroidAppUtils.showLog(TAG, " byteLogIndex : " + AndroidAppUtils.convertToHexString(byteLogIndex) +
+                                " intLogIndex : " + intLogIndex);
+                        if (intLogIndex > 10) {
+                            String strStartIndex = AndroidAppUtils.byteArrayCheckZero(byteLogIndex) ? AppHelper.NUMBER_ZERO : AndroidAppUtils.convertToHexString(byteLogIndex);
+                            AndroidAppUtils.showLog(TAG, "Log Index : " + strStartIndex);
+
+                            dataLoggingModel.setStrDataLogIndex(Integer.parseInt(strStartIndex.isEmpty() ? AppHelper.NUMBER_ZERO : strStartIndex, 16) + "");
+                        } else {
+                            String strStartIndex = AndroidAppUtils.byteArrayCheckZero(byteLogIndex) ? AppHelper.NUMBER_ZERO : AndroidAppUtils.removeTrailingZeros(AndroidAppUtils.convertToHexString(byteLogIndex));
+                            AndroidAppUtils.showLog(TAG, "Log Index : " + strStartIndex);
+
+                            dataLoggingModel.setStrDataLogIndex(Integer.parseInt(strStartIndex.isEmpty() ? AppHelper.NUMBER_ZERO : strStartIndex, 16) + "");
+                        }
                         break;
                     case 2:
                         byteData = byteDataReceived[i];
@@ -2414,90 +2271,25 @@ public class DataLoggingReadingActivity extends Activity {
                         break;
                     case 9:
                         bytePressureValue[i - 8] = byteDataReceived[i];
-                        String strPressureIndex = AndroidAppUtils.byteArrayCheckZero(bytePressureValue) ? AppHelper.NUMBER_ZERO : AndroidAppUtils.removeTrailingZeros(AndroidAppUtils.convertToHexString(bytePressureValue));
-                        AndroidAppUtils.showLog(TAG, "PRESSURE : " + AndroidAppUtils.convertToHexString(bytePressureValue) + "" +
-                                " value : " + strPressureIndex);
+                        int intPressureIndex = Integer.parseInt(AndroidAppUtils.convertToHexString(bytePressureValue), 16);
+                        if (intPressureIndex > 10) {
+                            String strPressureIndex = AndroidAppUtils.byteArrayCheckZero(bytePressureValue) ? AppHelper.NUMBER_ZERO : AndroidAppUtils.convertToHexString(bytePressureValue);
+                            AndroidAppUtils.showLog(TAG, "PRESSURE : " + AndroidAppUtils.convertToHexString(bytePressureValue) + "" +
+                                    " value : " + strPressureIndex);
 
-                        strLsbTemp = Integer.parseInt(strPressureIndex.isEmpty() ? AppHelper.NUMBER_ZERO : strPressureIndex, 16) + "";
-                        dataLoggingModel.setStrPressure(strLsbTemp);
+                            strLsbTemp = Integer.parseInt(strPressureIndex.isEmpty() ? AppHelper.NUMBER_ZERO : strPressureIndex, 16) + "";
+                            dataLoggingModel.setStrPressure(strLsbTemp);
+                        } else {
+                            String strPressureIndex = AndroidAppUtils.byteArrayCheckZero(bytePressureValue) ? AppHelper.NUMBER_ZERO : AndroidAppUtils.removeTrailingZeros(AndroidAppUtils.convertToHexString(bytePressureValue));
+                            AndroidAppUtils.showLog(TAG, "PRESSURE : " + AndroidAppUtils.convertToHexString(bytePressureValue) + "" +
+                                    " value : " + strPressureIndex);
+
+                            strLsbTemp = Integer.parseInt(strPressureIndex.isEmpty() ? AppHelper.NUMBER_ZERO : strPressureIndex, 16) + "";
+                            dataLoggingModel.setStrPressure(strLsbTemp);
+                        }
                         break;
                 }
-                /*if (i == 3) {
-                    byteData = byteDataReceived[i];
-                    AndroidAppUtils.showLog(TAG, " HEX LSB TEM : " + (byteData & 0xff));
-                    strLsbTemp = (byteData & 0xff) + "";
-                    dataLoggingModel.setStrLsbTemperature(strLsbTemp);
-                } else if (i == 2) {
-                    byteData = byteDataReceived[i];
-                    AndroidAppUtils.showLog(TAG, " HEX RSB TEM : " + (byteData & 0xff));
-                    strRsbTemp = (byteData & 0xff) + "";
-                    dataLoggingModel.setStrRsbTemperature(strRsbTemp);
-                } else if (i == 4) {
-                    byteData = byteDataReceived[i];
-                    AndroidAppUtils.showLog(TAG, " Battery Weeks : " + (byteData & 0xff));
-                    dataLoggingModel.setStrBatteryLife((byteData & 0xff) + "");
-                } else if (i == 5) {
-                    byteData = byteDataReceived[i];
-                    AndroidAppUtils.showLog(TAG, " Light Intensity : " + (byteData & 0xff));
 
-                    int num = (byteData & 0xff);
-                    AndroidAppUtils.showLog(TAG, "num : " + num + "   BINARY : " + Integer.toBinaryString(num));
-                    String strBinaryData = Integer.toBinaryString(num);
-                    strBinaryData = appendZeroToMakeEightBit(strBinaryData);
-                    char[] strTempArray = strBinaryData.toCharArray();
-                    String strLightValue = strBinaryData;
-                    if (strTempArray != null && strTempArray.length > 0) {
-                        if (strTempArray.length == 8 && strTempArray[0] == '1') {
-                            AndroidAppUtils.showLog(TAG, "Is Light Ambient Sensor");
-                        } else {
-                            AndroidAppUtils.showLog(TAG, "Is Not Light Ambient Sensor");
-                        }
-                        if (!strLightValue.isEmpty()) {
-                            dataLoggingModel.setStrTemper(strTempArray[0] + "");
-                            AndroidAppUtils.showLog(TAG, "Before Value : " + strLightValue + " converted value : " + Integer.parseInt(strLightValue, 2));
-                            strLightValue = strLightValue.substring(1, strLightValue.length());
-                            AndroidAppUtils.showLog(TAG, "After Value : " + strLightValue + " converted value : " + (!strLightValue.isEmpty() ? Integer.parseInt(strLightValue, 2) : "00"));
-                            dataLoggingModel.setStrLightIntensity(!strLightValue.isEmpty() ? Integer.parseInt(strLightValue, 2) + "" : "00");
-                        }
-
-                    } else {
-                        AndroidAppUtils.showLog(TAG, "strTempArray is null or size is zero");
-                    }
-                } else if (i == 1) {
-                    byteLogIndex[i] = byteDataReceived[i];
-                    AndroidAppUtils.showLog(TAG, " byteLogIndex : " + AndroidAppUtils.convertToHexString(byteLogIndex));
-                    String strStartIndex = AndroidAppUtils.removeTrailingZeros(AndroidAppUtils.convertToHexString(byteLogIndex));
-                    AndroidAppUtils.showLog(TAG, "Log Index : " + strStartIndex);
-
-                    dataLoggingModel.setStrDataLogIndex(Integer.parseInt(strStartIndex.isEmpty() ? "0" : strStartIndex, 16) + "");
-                } else if (i == 0) {
-                    byteLogIndex[i] = byteDataReceived[i];
-                } else if (i == 9) {
-//                    byteData = byteDataReceived[i];
-                    bytePressureValue[i - 8] = byteDataReceived[i];
-                    String strPressureIndex = AndroidAppUtils.removeTrailingZeros(AndroidAppUtils.convertToHexString(bytePressureValue));
-                    AndroidAppUtils.showLog(TAG, "PRESSURE : " + AndroidAppUtils.convertToHexString(bytePressureValue) + "" +
-                            " value : " + strPressureIndex);
-
-                    strLsbTemp = Integer.parseInt(strPressureIndex.isEmpty() ? "0" : strPressureIndex, 16) + "";
-                    dataLoggingModel.setStrPressure(strLsbTemp);
-                } else if (i == 8) {
-//                    byteData = byteDataReceived[i];
-                    bytePressureValue[i - 8] = byteDataReceived[i];
-//                    AndroidAppUtils.showLog(TAG, " HEX RSB PRESSURE : " + (byteData & 0xff));
-//                    strRsbTemp = (byteData & 0xff) + "";
-//                    dataLoggingModel.setStrRsbPressure(strRsbTemp);
-                } else if (i == 7) {
-                    byteData = byteDataReceived[i];
-                    AndroidAppUtils.showLog(TAG, " HEX LSB HUMIDITY : " + (byteData & 0xff));
-                    strLsbTemp = (byteData & 0xff) + "";
-                    dataLoggingModel.setStrLsbHumidity(strLsbTemp);
-                } else if (i == 6) {
-                    byteData = byteDataReceived[i];
-                    AndroidAppUtils.showLog(TAG, " HEX RSB HUMIDITY : " + (byteData & 0xff));
-                    strRsbTemp = (byteData & 0xff) + "";
-                    dataLoggingModel.setStrRsbHumidity(strRsbTemp);
-                }*/
             }
 
             if (!dataLoggingModelArrayList.contains(dataLoggingModel)) {
@@ -2514,6 +2306,165 @@ public class DataLoggingReadingActivity extends Activity {
             if (mDataLoggingListAdapter != null) {
                 if (dataLoggingModelArrayList.size() > 0 && dataLoggingModelArrayList.size() == TOTAL_NUMBER_RECORDS) {
 //                    AndroidAppUtils.hideProgressDialog();
+                    boolIsGroupIndexShowing = false;
+                    mDataLoggingListAdapter.setListData(dataLoggingModelArrayList);
+                    mDataLoggingListAdapter.notifyDataSetChanged();
+                }
+            } else {
+                AndroidAppUtils.showLog(TAG, "mDataLoggingListAdapter is null");
+            }
+        } else
+
+        {
+            AndroidAppUtils.showLog(TAG, "byteDataReceived in null");
+        }
+
+    }
+
+    /**
+     * Method Name :saveBeaconB5DataLoggingData
+     * Description : This method is used for saving each log data into array list
+     * and displaying the newly log generated into the list for Beacon B5
+     *
+     * @param byteDataReceived
+     */
+    @RequiresApi(api = Build.VERSION_CODES.KITKAT)
+    private void saveBeaconB5DataLoggingData(byte[] byteDataReceived) {
+        byte byteData;
+        String strLsbTemp = "", strRsbTemp = "";
+        if (byteDataReceived != null) {
+            AndroidAppUtils.showLog(TAG, " DATA IN HEX INSIDE saveBeaconB4DataLoggingData : " + AndroidAppUtils.convertToHexString(byteDataReceived));
+            String strData = AndroidAppUtils.convertToHexString(byteDataReceived);
+            String strUnHexData = AndroidAppUtils.convertHexToString(strData);
+            AndroidAppUtils.showLog(TAG, " DATA IN UN HEX INSIDE saveBeaconB4DataLoggingData : " + strUnHexData);
+            char[] strSplitData = strUnHexData.toCharArray();
+            final DataLoggingModel dataLoggingModel = new DataLoggingModel();
+            byte[] byteLogIndex = new byte[2], byteTiltAngelValue = new byte[2];
+            for (int i = 0; i < strSplitData.length; i++) {
+                switch (i) {
+                    case 0:
+                        byteLogIndex[i] = byteDataReceived[i];
+                        break;
+                    case 1:
+                        byteLogIndex[i] = byteDataReceived[i];
+
+                        int intLogIndex = Integer.parseInt(AndroidAppUtils.convertToHexString(byteLogIndex), 16);
+                        AndroidAppUtils.showLog(TAG, " byteLogIndex : " + AndroidAppUtils.convertToHexString(byteLogIndex) +
+                                " intLogIndex : " + intLogIndex);
+                        if (intLogIndex > 10) {
+                            String strStartIndex = AndroidAppUtils.byteArrayCheckZero(byteLogIndex) ? AppHelper.NUMBER_ZERO : AndroidAppUtils.convertToHexString(byteLogIndex);
+                            AndroidAppUtils.showLog(TAG, "Log Index : " + strStartIndex);
+                            dataLoggingModel.setStrDataLogIndex(Integer.parseInt(strStartIndex.isEmpty() ? AppHelper.NUMBER_ZERO : strStartIndex, 16) + "");
+                        } else {
+                            String strStartIndex = AndroidAppUtils.byteArrayCheckZero(byteLogIndex) ? AppHelper.NUMBER_ZERO : AndroidAppUtils.removeTrailingZeros(AndroidAppUtils.convertToHexString(byteLogIndex));
+                            AndroidAppUtils.showLog(TAG, "Log Index : " + strStartIndex);
+                            dataLoggingModel.setStrDataLogIndex(Integer.parseInt(strStartIndex.isEmpty() ? AppHelper.NUMBER_ZERO : strStartIndex, 16) + "");
+                        }
+                        break;
+                    case 2:
+                        byteData = byteDataReceived[i];
+                        AndroidAppUtils.showLog(TAG, " HEX RSB TEM : " + (byteData & 0xff));
+                        strRsbTemp = (byteData & 0xff) + "";
+                        dataLoggingModel.setStrRsbTemperature(strRsbTemp);
+                        break;
+                    case 3:
+                        byteData = byteDataReceived[i];
+                        AndroidAppUtils.showLog(TAG, " HEX LSB TEM : " + (byteData & 0xff));
+                        strLsbTemp = (byteData & 0xff) + "";
+                        dataLoggingModel.setStrLsbTemperature(strLsbTemp);
+                        break;
+                    case 4:
+                        byteData = byteDataReceived[i];
+                        AndroidAppUtils.showLog(TAG, " Battery Weeks : " + (byteData & 0xff));
+                        dataLoggingModel.setStrBatteryLife((byteData & 0xff) + "");
+                        break;
+                    case 5:
+                        byteData = byteDataReceived[i];
+                        AndroidAppUtils.showLog(TAG, " Light Intensity : " + (byteData & 0xff));
+
+                        int num = (byteData & 0xff);
+                        AndroidAppUtils.showLog(TAG, "num : " + num + "   BINARY : " + Integer.toBinaryString(num));
+                        String strBinaryData = Integer.toBinaryString(num);
+                        strBinaryData = appendZeroToMakeEightBit(strBinaryData);
+                        char[] strTempArray = strBinaryData.toCharArray();
+                        String strLightValue = strBinaryData;
+                        if (strTempArray != null && strTempArray.length > 0) {
+                            if (strTempArray.length == 8 && strTempArray[0] == '1') {
+                                AndroidAppUtils.showLog(TAG, "Is Light Ambient Sensor");
+                            } else {
+                                AndroidAppUtils.showLog(TAG, "Is Not Light Ambient Sensor");
+                            }
+                            if (!strLightValue.isEmpty()) {
+                                dataLoggingModel.setStrTemper(strTempArray[0] + "");
+                                AndroidAppUtils.showLog(TAG, "Before Value : " + strLightValue + " converted value : " + Integer.parseInt(strLightValue, 2));
+                                strLightValue = strLightValue.substring(1, strLightValue.length());
+                                AndroidAppUtils.showLog(TAG, "After Value : " + strLightValue + " converted value : " + (!strLightValue.isEmpty() ? Integer.parseInt(strLightValue, 2) : "00"));
+                                dataLoggingModel.setStrLightIntensity(!strLightValue.isEmpty() ? Integer.parseInt(strLightValue, 2) + "" : "00");
+                            }
+
+                        } else {
+                            AndroidAppUtils.showLog(TAG, "strTempArray is null or size is zero");
+                        }
+                        break;
+                    case 6:
+                        byteData = byteDataReceived[i];
+                        AndroidAppUtils.showLog(TAG, " HEX SHOCK VALUE : " + (byteData & 0xff));
+                        strRsbTemp = (byteData & 0xff) + "";
+                        dataLoggingModel.setStrShockValue(strRsbTemp);
+                        break;
+
+                    case 7:
+                        byteData = byteDataReceived[i];
+                        byteTiltAngelValue[i - 7] = byteDataReceived[i];
+                        AndroidAppUtils.showLog(TAG, " RSB TILT VALUE : " + (byteData & 0xff));
+//                        dataLoggingModel.setStrTiltAngel((byteData & 0xff) + "");
+                        break;
+                    case 8:
+                        byteData = byteDataReceived[i];
+                        byteTiltAngelValue[i - 7] = byteDataReceived[i];
+                        AndroidAppUtils.showLog(TAG, " LSB TILT VALUE : " + (byteData & 0xff));
+                        int intTiltAngel = Integer.parseInt(AndroidAppUtils.convertToHexString(byteTiltAngelValue), 16);
+                        AndroidAppUtils.showLog(TAG, " intTiltAngel : " + intTiltAngel);
+                        if (intTiltAngel > 10) {
+                            String strTileIndex = AndroidAppUtils.byteArrayCheckZero(byteTiltAngelValue) ? AppHelper.NUMBER_ZERO : AndroidAppUtils.convertToHexString(byteTiltAngelValue);
+                            AndroidAppUtils.showLog(TAG, "strTileIndex  : " + strTileIndex);
+                            int intTiltAngelActualValue = Integer.parseInt(strTileIndex.isEmpty() ? AppHelper.NUMBER_ZERO : strTileIndex, 16);
+                            if (intTiltAngelActualValue > 180) {
+                                intTiltAngelActualValue = 360 - intTiltAngelActualValue;
+                                dataLoggingModel.setStrTiltAngel(AppHelper.HYPHEN + intTiltAngelActualValue + "");
+                            } else {
+                                dataLoggingModel.setStrTiltAngel(intTiltAngelActualValue + "");
+                            }
+
+                        } else {
+                            String strTileIndex = AndroidAppUtils.byteArrayCheckZero(byteTiltAngelValue) ? AppHelper.NUMBER_ZERO : AndroidAppUtils.removeTrailingZeros(AndroidAppUtils.convertToHexString(byteTiltAngelValue));
+                            AndroidAppUtils.showLog(TAG, "strTileIndex : " + strTileIndex);
+                            int intTiltAngelActualValue = Integer.parseInt(strTileIndex.isEmpty() ? AppHelper.NUMBER_ZERO : strTileIndex, 16);
+                            if (intTiltAngelActualValue > 180) {
+                                intTiltAngelActualValue = 360 - intTiltAngelActualValue;
+                                dataLoggingModel.setStrTiltAngel(AppHelper.HYPHEN + intTiltAngelActualValue + "");
+                            } else {
+                                dataLoggingModel.setStrTiltAngel(intTiltAngelActualValue + "");
+                            }
+                        }
+                        break;
+                }
+
+            }
+
+            if (!dataLoggingModelArrayList.contains(dataLoggingModel)) {
+                dataLoggingModelArrayList.add(dataLoggingModel);
+
+                if (mDataLoggingListAdapter != null) {
+                    mProgressBar.setVisibility(View.GONE);
+                    boolIsGroupIndexShowing = false;
+                    mDataLoggingListAdapter.addItemToList(dataLoggingModel);
+                    mDataLoggingListAdapter.notifyDataSetChanged();
+                }
+                AndroidAppUtils.showLog(TAG, "dataLoggingModelsList size : " + dataLoggingModelArrayList.size());
+            }
+            if (mDataLoggingListAdapter != null) {
+                if (dataLoggingModelArrayList.size() > 0 && dataLoggingModelArrayList.size() == TOTAL_NUMBER_RECORDS) {
                     boolIsGroupIndexShowing = false;
                     mDataLoggingListAdapter.setListData(dataLoggingModelArrayList);
                     mDataLoggingListAdapter.notifyDataSetChanged();

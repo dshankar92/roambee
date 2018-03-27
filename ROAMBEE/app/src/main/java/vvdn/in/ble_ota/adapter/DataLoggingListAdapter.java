@@ -124,9 +124,11 @@ public class DataLoggingListAdapter extends BaseAdapter {
             if (GlobalConstant.STRING_CURRENT_BEACON_TYPE_CONNECTED.equalsIgnoreCase(GlobalKeys.BEACON_TYPE_B1_CONNECTED)) {
                 convertView = mLayoutInflater.inflate(R.layout.data_logging_tabular_data_view, parent,
                         false);
-            } else if (GlobalConstant.STRING_CURRENT_BEACON_TYPE_CONNECTED.equalsIgnoreCase(GlobalKeys.BEACON_TYPE_B4_CONNECTED) ||
-                    GlobalConstant.STRING_CURRENT_BEACON_TYPE_CONNECTED.equalsIgnoreCase(GlobalKeys.BEACON_TYPE_B5_CONNECTED)) {
+            } else if (GlobalConstant.STRING_CURRENT_BEACON_TYPE_CONNECTED.equalsIgnoreCase(GlobalKeys.BEACON_TYPE_B4_CONNECTED)) {
                 convertView = mLayoutInflater.inflate(R.layout.data_logging_beacon_b4_tabular_data_view, parent,
+                        false);
+            } else if (GlobalConstant.STRING_CURRENT_BEACON_TYPE_CONNECTED.equalsIgnoreCase(GlobalKeys.BEACON_TYPE_B5_CONNECTED)) {
+                convertView = mLayoutInflater.inflate(R.layout.data_logging_beacon_b5_tabular_data_view, parent,
                         false);
             }
             holder = new ViewHolder(convertView);
@@ -138,7 +140,7 @@ public class DataLoggingListAdapter extends BaseAdapter {
             AndroidAppUtils.showLog(TAG, "inside adapter dataLoggingModelList size : " + dataLoggingModelList.size());
             DataLoggingModel dataLoggingModel = dataLoggingModelList.get(position);
             String strLsbTemp = "", strRsbTemp = "", strLsbPressure = "",
-                    strRsbPressure = "", strLsbHumidity = "", strRsbHumidity = "",strPressure="";
+                    strRsbPressure = "", strLsbHumidity = "", strRsbHumidity = "", strPressure = "";
             if (dataLoggingModel != null) {
                 if (dataLoggingModel.getStrBatteryLife() != null) {
                     holder.mtvBatteryLifeData.setText(!dataLoggingModel.getStrBatteryLife().isEmpty() ? dataLoggingModel.getStrBatteryLife() : null);
@@ -155,11 +157,11 @@ public class DataLoggingListAdapter extends BaseAdapter {
                 }
                 if ((strLsbTemp != null && !strLsbTemp.isEmpty()) && (strRsbTemp != null && !strRsbTemp.isEmpty())) {
 //                    holder.mtvTemperatureData.setText("20" + "." + "0");
-                    holder.mtvTemperatureData.setText(strRsbTemp + AppHelper.DOT + (strLsbTemp.isEmpty() ? AppHelper.NUMBER_ZERO :strLsbTemp.length()>2?strLsbTemp.substring(0, 2):strLsbTemp));
+                    holder.mtvTemperatureData.setText(strRsbTemp + AppHelper.DOT + (strLsbTemp.isEmpty() ? AppHelper.NUMBER_ZERO : strLsbTemp.length() > 2 ? strLsbTemp.substring(0, 2) : strLsbTemp));
                 } else if (strRsbTemp != null && strRsbTemp.isEmpty()) {
                     holder.mtvTemperatureData.setText(strRsbTemp);
                 } else if (strLsbTemp != null && strLsbTemp.isEmpty()) {
-                    holder.mtvTemperatureData.setText(AppHelper.NUMBER_ZERO  + AppHelper.DOT + strLsbTemp);
+                    holder.mtvTemperatureData.setText(AppHelper.NUMBER_ZERO + AppHelper.DOT + strLsbTemp);
                 }
                 /**
                  * Feature (Pressure,Humidity is for Beacon B4 Device Only
@@ -172,7 +174,7 @@ public class DataLoggingListAdapter extends BaseAdapter {
                     strRsbHumidity = !dataLoggingModel.getStrRsbHumidity().isEmpty() ? dataLoggingModel.getStrRsbHumidity() : null;
                 }
                 if ((strLsbHumidity != null && !strLsbHumidity.isEmpty()) && (strRsbHumidity != null && !strRsbHumidity.isEmpty())) {
-                    holder.mTvHumidity.setText(strRsbHumidity + AppHelper.DOT + (strLsbHumidity.isEmpty() ? AppHelper.NUMBER_ZERO :strLsbHumidity.length()>2?strLsbHumidity.substring(0, 2):strLsbHumidity));
+                    holder.mTvHumidity.setText(strRsbHumidity + AppHelper.DOT + (strLsbHumidity.isEmpty() ? AppHelper.NUMBER_ZERO : strLsbHumidity.length() > 2 ? strLsbHumidity.substring(0, 2) : strLsbHumidity));
                 } else if (strRsbHumidity != null && strRsbHumidity.isEmpty()) {
                     holder.mTvHumidity.setText(strRsbHumidity);
                 } else if (strLsbHumidity != null && strLsbHumidity.isEmpty()) {
@@ -183,8 +185,8 @@ public class DataLoggingListAdapter extends BaseAdapter {
                     strPressure = !dataLoggingModel.getStrPressure().isEmpty() ? dataLoggingModel.getStrPressure() : null;
 
                 }
-                if ((strPressure != null && !strPressure.isEmpty()) ) {
-                    holder.mTvPressure.setText(strPressure );
+                if ((strPressure != null && !strPressure.isEmpty())) {
+                    holder.mTvPressure.setText(strPressure);
                 }
                 if (!dataLoggingModel.getStrTemper().isEmpty()) {
                     holder.tvTamperData.setText(dataLoggingModel.getStrTemper());
@@ -211,28 +213,62 @@ public class DataLoggingListAdapter extends BaseAdapter {
                     holder.mTvDate.setText(AndroidAppUtils.getOnlyDate(AndroidAppUtils.calculateTimeStamp(GlobalConstant.longGroupIndexTimeStamp, intCalculatedDifference + "")));
                     holder.tvTimeStampData.setText(AndroidAppUtils.getTime(AndroidAppUtils.calculateTimeStamp(GlobalConstant.longGroupIndexTimeStamp, intCalculatedDifference + "")));
                     holder.mTvSerialNumber.setText(position + 1 + "");
+
                 }
-                if (position % 2 == 0) {
-                    holder.lLTabularDataHeader.setBackgroundColor(mActivity.getResources().getColor(R.color.warm_grey_two_30_opacity));
-                } else {
-                    holder.lLTabularDataHeader.setBackgroundColor(mActivity.getResources().getColor(R.color.white_six));
+                String strShockValue = "", strLSBTiltValue = "", strRSBTiltValue = "", strTiltAngel = "";
+                if (dataLoggingModel.getStrShockValue() != null && !dataLoggingModel.getStrShockValue().isEmpty()) {
+                    strShockValue = dataLoggingModel.getStrShockValue();
                 }
-                holder.tvTamperData.setTypeface(null, Typeface.NORMAL);
-                holder.mtvTemperatureData.setTypeface(null, Typeface.NORMAL);
-                holder.mtvBatteryLifeData.setTypeface(null, Typeface.NORMAL);
-                holder.mtvLightIntensityData.setTypeface(null, Typeface.NORMAL);
-                holder.mTvDate.setTypeface(null, Typeface.NORMAL);
-                holder.tvTimeStampData.setTypeface(null, Typeface.NORMAL);
-                holder.tvTimeStampData.setGravity(Gravity.CENTER_VERTICAL);
-                if (holder.mTvPressure != null && holder.mTvHumidity != null) {
-                    holder.mTvHumidity.setTypeface(null, Typeface.NORMAL);
-                    holder.mTvPressure.setTypeface(null, Typeface.NORMAL);
+                if (holder.mTvShock != null && (strShockValue != null && !strShockValue.isEmpty())) {
+                    holder.mTvShock.setText(strShockValue);
                 }
-            } else {
-                AndroidAppUtils.showLog(TAG, " dataLoggingModel is null");
+                if (dataLoggingModel.getStrLSBTiltAngel() != null) {
+                    strLSBTiltValue = !dataLoggingModel.getStrLSBTiltAngel().isEmpty() ? dataLoggingModel.getStrLSBTiltAngel() : null;
+
+                }
+                if (dataLoggingModel.getStrRSBTiltAngel() != null) {
+                    strRSBTiltValue = !dataLoggingModel.getStrRSBTiltAngel().isEmpty() ? dataLoggingModel.getStrRSBTiltAngel() : null;
+                }
+                if (dataLoggingModel.getStrTiltAngel() != null) {
+                    strTiltAngel = !dataLoggingModel.getStrTiltAngel().isEmpty() ? dataLoggingModel.getStrTiltAngel() : null;
+                }
+                /*if ((strLSBTiltValue != null && !strLSBTiltValue.isEmpty()) && (strRSBTiltValue != null && !strRSBTiltValue.isEmpty())) {
+                    holder.mTvTiltAngel.setText(strRSBTiltValue + AppHelper.DOT + (strLSBTiltValue.isEmpty() ? AppHelper.NUMBER_ZERO : strLSBTiltValue.length() > 2 ? strLSBTiltValue.substring(0, 2) : strLSBTiltValue));
+                } else if (strRSBTiltValue != null && strRSBTiltValue.isEmpty()) {
+                    holder.mTvTiltAngel.setText(strRSBTiltValue);
+                } else if (strLSBTiltValue != null && strLSBTiltValue.isEmpty()) {
+                    holder.mTvTiltAngel.setText(AppHelper.NUMBER_ZERO + AppHelper.DOT + strLSBTiltValue);
+                }*/
+                if (strTiltAngel != null && !(strTiltAngel.isEmpty())) {
+                    holder.mTvTiltAngel.setText(strTiltAngel);
+                }
             }
+            if (position % 2 == 0) {
+                holder.lLTabularDataHeader.setBackgroundColor(mActivity.getResources().getColor(R.color.warm_grey_two_30_opacity));
+            } else {
+                holder.lLTabularDataHeader.setBackgroundColor(mActivity.getResources().getColor(R.color.white_six));
+            }
+            holder.tvTamperData.setTypeface(null, Typeface.NORMAL);
+            holder.mtvTemperatureData.setTypeface(null, Typeface.NORMAL);
+            holder.mtvBatteryLifeData.setTypeface(null, Typeface.NORMAL);
+            holder.mtvLightIntensityData.setTypeface(null, Typeface.NORMAL);
+            holder.mTvDate.setTypeface(null, Typeface.NORMAL);
+            holder.tvTimeStampData.setTypeface(null, Typeface.NORMAL);
+            holder.tvTimeStampData.setGravity(Gravity.CENTER_VERTICAL);
+            if (holder.mTvPressure != null && holder.mTvHumidity != null) {
+                holder.mTvHumidity.setTypeface(null, Typeface.NORMAL);
+                holder.mTvPressure.setTypeface(null, Typeface.NORMAL);
+            }
+            if (holder.mTvShock != null && holder.mTvTiltAngel != null) {
+                holder.mTvShock.setTypeface(null, Typeface.NORMAL);
+                holder.mTvTiltAngel.setTypeface(null, Typeface.NORMAL);
+            }
+        } else {
+            AndroidAppUtils.showLog(TAG, " dataLoggingModel is null");
         }
+
         return convertView;
+
 
     }
 
@@ -241,7 +277,8 @@ public class DataLoggingListAdapter extends BaseAdapter {
      */
     private class ViewHolder {
         TextView mtvTemperatureData, mtvBatteryLifeData, mtvLightIntensityData,
-                tvTamperData, tvTimeStampData, mTvDate, mTvSerialNumber, mTvPressure, mTvHumidity;
+                tvTamperData, tvTimeStampData, mTvDate, mTvSerialNumber, mTvPressure, mTvHumidity,
+                mTvShock, mTvTiltAngel;
         LinearLayout lLTabularDataHeader;
         RelativeLayout rLTime;
 
@@ -257,6 +294,8 @@ public class DataLoggingListAdapter extends BaseAdapter {
             rLTime = (RelativeLayout) view.findViewById(R.id.rLTime);
             mTvHumidity = (TextView) view.findViewById(R.id.mTvHumidity);
             mTvPressure = (TextView) view.findViewById(R.id.mTvPressure);
+            mTvShock = (TextView) view.findViewById(R.id.mTvShock);
+            mTvTiltAngel = (TextView) view.findViewById(R.id.mTvTiltAngel);
         }
 
 

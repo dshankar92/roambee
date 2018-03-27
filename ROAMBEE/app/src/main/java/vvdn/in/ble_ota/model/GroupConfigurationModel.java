@@ -17,6 +17,25 @@ public class GroupConfigurationModel {
     String strChannel38 = "";
     String strChannel39 = "";
     String strDataLoggingInterval = "";
+    String strPharmaModeValue = "";
+    String strPharmaModeDelay = "";
+
+    public String getStrPharmaModeValue() {
+        return strPharmaModeValue;
+    }
+
+    public void setStrPharmaModeValue(String strPharmaModeValue) {
+        this.strPharmaModeValue = strPharmaModeValue;
+    }
+
+    public String getStrPharmaModeDelay() {
+        return strPharmaModeDelay;
+    }
+
+    public void setStrPharmaModeDelay(String strPharmaModeDelay) {
+        this.strPharmaModeDelay = strPharmaModeDelay;
+    }
+
 
     public String getStrPrfTimeOut() {
         return strPrfTimeOut;

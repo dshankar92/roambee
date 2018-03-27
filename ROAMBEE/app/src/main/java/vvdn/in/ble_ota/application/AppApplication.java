@@ -75,7 +75,7 @@ public class AppApplication extends Application {
         mSharedPreferences = getSharedPreferences(GlobalKeys.ROAMBEE_SHARED_PREFERENCE, MODE_PRIVATE);
         mEditor = mSharedPreferences.edit();
         GlobalConstant.mGlobalActivityArrayList = new ArrayList<>();
-        GlobalConstant.mLogSession = Logger.newSession(mInstance, TAG, "Application");
+        GlobalConstant.mLogSession = Logger.newSession(mInstance, TAG, "AppApplication");
     }
 
     /**
@@ -228,4 +228,22 @@ public class AppApplication extends Application {
         }
         super.onTerminate();
     }
+
+  /*  public void addActivityToGlobalList(Activity mActivity) {
+        if (GlobalConstant.mGlobalActivityArrayList != null) {
+            if (GlobalConstant.mGlobalActivityArrayList.size() > 0) {
+                for (int i = 0; i <GlobalConstant.mGlobalActivityArrayList.size() ; i++) {
+                    if(mActivity instanceof (GlobalConstant.mGlobalActivityArrayList.get(i)))
+                    {
+
+                    }
+                }
+            } else {
+
+            }
+
+        } else {
+            AndroidAppUtils.showWarningLog(TAG, "GlobalConstant.mGlobalActivityArrayList is null");
+        }
+    }*/
 }

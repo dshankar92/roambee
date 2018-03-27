@@ -7,6 +7,7 @@ import android.app.AlertDialog;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothManager;
+import android.bluetooth.le.ScanSettings;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -31,7 +32,9 @@ import android.support.v7.widget.RecyclerView;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
+import android.view.KeyEvent;
 import android.view.View;
+import android.view.inputmethod.EditorInfo;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ListView;
@@ -40,7 +43,6 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import java.util.ArrayList;
-import java.util.List;
 
 import vvdn.in.ble_ota.AndroidAppUtils;
 import vvdn.in.ble_ota.AppHelper;
@@ -71,6 +73,7 @@ public class BleScanScreen extends Activity {
     private static final int REQUEST_ENABLE_LOCATION = 2;
     private static final int MY_PERMISSIONS_REQUEST_LOCATION = 99;
     private static final long ONE_SEC = 1000;
+    private String strListType = "strCurrentList";
     /**
      * Relative layout instance object
      */
@@ -94,7 +97,8 @@ public class BleScanScreen extends Activity {
     /**
      * ArrayList reference object for holding discovered device data
      */
-    private ArrayList<BLEDataModel> bleDeviceModelsList = new ArrayList<>();
+    private ArrayList<BLEDataModel> bleDeviceModelsList = new ArrayList<>(),
+            bleDeviceModelsOriginalList = new ArrayList<>();
     /**
      * TextView reference object for displaying message no device found
      */
@@ -229,6 +233,7 @@ public class BleScanScreen extends Activity {
         mlLRefresh.setVisibility(View.VISIBLE);
         setListener();
         bleDeviceModelsList = new ArrayList<>();
+        bleDeviceModelsOriginalList = new ArrayList<>();
         isStoragePermissionGranted();
         setDataOnList();
         starBluetoothScanning();
@@ -260,7 +265,6 @@ public class BleScanScreen extends Activity {
                                 bleDataModel.setBleDevice(intent.hasExtra(GlobalConstant.KEY_BLUETOOTH_DEVICE) ? (BluetoothDevice) intent.getExtras().get(GlobalConstant.KEY_BLUETOOTH_DEVICE) : null);
                                 bleDataModel.setStrRssiStrength(intent.hasExtra(GlobalConstant.KEY_RSSI_STRENGTH) ? intent.getStringExtra(GlobalConstant.KEY_RSSI_STRENGTH) : "0");
                                 bleDataModel.setStrManufactureData(intent.hasExtra(GlobalConstant.KEY_MANUFACTURE_DATA) ? intent.getStringExtra(GlobalConstant.KEY_MANUFACTURE_DATA) : "0");
-
                                 mDeviceAdapter.setMoreDataToList(bleDataModel);
                             } else {
                                 AndroidAppUtils.showLog(TAG, "intent is null");
@@ -274,6 +278,95 @@ public class BleScanScreen extends Activity {
         }
     };
 
+    /**
+     * Add newly discovered ble device to the former list
+     *
+     * @param bleDataModel
+     */
+
+    public void setMoreDataToList(final BLEDataModel bleDataModel) {
+        String mStrFilterAppliedDeviceNameAddress = etSearchFilter.getText().toString();
+        AndroidAppUtils.showLog(TAG, " mStrFilterAppliedDeviceNameAddress  : " + mStrFilterAppliedDeviceNameAddress);
+        boolean boolIsDeviceAlreadyAddedInCurrent = false, boolIsDeviceAlreadyAddedInOriginal = false;
+        if (bleDeviceModelsList != null && bleDeviceModelsList.size() > 0) {
+//            for (BLEDataModel OldBleDataModel : bleDeviceModelsList) {
+            for (int i = 0; i < bleDeviceModelsList.size(); i++) {
+                BLEDataModel OldBleDataModel = bleDeviceModelsList.get(i);
+                if (OldBleDataModel.getMacAddress().equalsIgnoreCase(bleDataModel.getMacAddress())
+                       /* || OldBleDataModel.getName().equalsIgnoreCase(bleDataModel.getName())*/) {
+                    boolIsDeviceAlreadyAddedInCurrent = true;
+                    checkAndUpdateManufactureData(bleDataModel, i);
+                    break;
+                }
+            }
+
+        }
+        if (bleDeviceModelsOriginalList != null && bleDeviceModelsOriginalList.size() > 0) {
+            for (BLEDataModel OldBleDataModel : bleDeviceModelsOriginalList)
+                if (OldBleDataModel.getMacAddress().equalsIgnoreCase(bleDataModel.getMacAddress())
+                       /* || OldBleDataModel.getName().equalsIgnoreCase(bleDataModel.getName())*/) {
+                    boolIsDeviceAlreadyAddedInOriginal = true;
+                    break;
+                }
+        }
+        if (!boolIsDeviceAlreadyAddedInOriginal && !bleDeviceModelsOriginalList.contains(bleDataModel)) {
+            this.bleDeviceModelsOriginalList.add(bleDataModel);
+            this.bleDeviceModelsOriginalList = mDeviceAdapter.clearDuplicateEntries(bleDeviceModelsOriginalList);
+            mDeviceAdapter.setCompleteListData(bleDeviceModelsOriginalList);
+        }
+     /*   *
+     * Check newly discovered device name or address starts with filter text applied then add it to display list
+     * otherwise if not present then add it to back up or original list
+     */
+        if (!boolIsDeviceAlreadyAddedInCurrent && ((bleDataModel.getName().toLowerCase().startsWith(mStrFilterAppliedDeviceNameAddress.toLowerCase()) ||
+                bleDataModel.getMacAddress().toLowerCase().startsWith(mStrFilterAppliedDeviceNameAddress.toLowerCase())))) {
+            bleDeviceModelsList.add(bleDataModel);
+            mDeviceAdapter.setListData(bleDeviceModelsList);
+        } else {
+//            if (!boolIsDeviceAlreadyAddedInCurrent && boolIsDeviceAlreadyAddedInOriginal) {
+//                mDeviceAdapter.notifyDataSetChanged();
+//            }
+            AndroidAppUtils.showLog(TAG, " Adding device to other list as it doesn't matches : " + bleDataModel.getName());
+        }
+
+    }
+
+    /**
+     * Method Name : checkAndUpdateManufactureData
+     * Description : This method is used for updating the manufacture data for device
+     * broadcasting change value corresponding to its mac address
+     *
+     * @param mBleDataModel
+     * @param intPosition
+     */
+    public void checkAndUpdateManufactureData(final BLEDataModel mBleDataModel, final int intPositions) {
+        if (mBleDataModel != null && (bleDeviceModelsList != null && bleDeviceModelsList.size() > 0)) {
+            for (int intPosition = 0; intPosition < bleDeviceModelsList.size(); intPosition++) {
+                BLEDataModel mOlDataModel = bleDeviceModelsList.get(intPosition);
+                if (mOlDataModel.getMacAddress().toLowerCase().equalsIgnoreCase(mBleDataModel.getMacAddress().toLowerCase())) {
+                    if (!mOlDataModel.getStrManufactureData().toLowerCase().equalsIgnoreCase(mBleDataModel.getStrManufactureData().toLowerCase())) {
+                        if (!AndroidAppUtils.byteArrayCheckZero(mBleDataModel.getStrManufactureData().getBytes())) {
+                            this.bleDeviceModelsList.set(intPosition, mBleDataModel);
+
+                        } else {
+                            mBleDataModel.setStrManufactureData(mOlDataModel.getStrManufactureData());
+                            this.bleDeviceModelsList.set(intPosition, mBleDataModel);
+                        }
+                        mActivity.runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                mDeviceAdapter.notifyDataSetChanged();
+                            }
+                        });
+                        break;
+                    }
+
+
+                }
+
+            }
+        }
+    }
 
     /**
      * Method Name : setListener
@@ -293,6 +386,15 @@ public class BleScanScreen extends Activity {
             }
         });
 
+        etSearchFilter.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+            public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+                if ((event != null && (event.getKeyCode() == KeyEvent.KEYCODE_ENTER)) || (actionId == EditorInfo.IME_ACTION_DONE)) {
+                    AndroidAppUtils.showInfoLog(TAG, "Enter pressed");
+                    AndroidAppUtils.hideKeyboard(mActivity, etSearchFilter);
+                }
+                return false;
+            }
+        });
     }
 
 
@@ -307,6 +409,9 @@ public class BleScanScreen extends Activity {
                 scanLeDevice(true);
                 showSettingsAlert(BleScanScreen.this);
                 showProgressBar();
+                if (GlobalConstant.BOOL_IS_CONNECT_BUTTON_CLICKED) {
+                    GlobalConstant.BOOL_IS_CONNECT_BUTTON_CLICKED = false;
+                }
 
             }
         }
@@ -318,6 +423,7 @@ public class BleScanScreen extends Activity {
      */
     private void setAdapterToDefault() {
         bleDeviceModelsList = new ArrayList<>();
+        bleDeviceModelsOriginalList = new ArrayList<>();
         if (mDeviceAdapter != null) {
             mDeviceAdapter.setListData(bleDeviceModelsList);
         } else {
@@ -493,47 +599,7 @@ public class BleScanScreen extends Activity {
             bleDataModel.setBleDevice(device);
             bleDataModel.setStrRssiStrength(rssiPercent + "");
             bleDataModel.setStrManufactureData(fetchManufactureData(scanRecord, name));
-            boolean isDeviceAdded = false;
-            bleDeviceModelsList = mDeviceAdapter.getBleDeviceModelsList();
-            if (bleDeviceModelsList != null && bleDeviceModelsList.size() > 0) {
-                for (BLEDataModel dataModel : bleDeviceModelsList) {
-                    if (dataModel.getMacAddress().equalsIgnoreCase(device.getAddress())) {
-                        isDeviceAdded = true;
-                        break;
-                    }
-                }
-            }
-            if (!isDeviceAdded && !bleDeviceModelsList.contains(bleDataModel)) {
-                AndroidAppUtils.showInfoLog(TAG, "bleDataModel.getName() : " + bleDataModel.getName() +
-                        "\n scanRecord in hex : " + AndroidAppUtils.convertToHexString(scanRecord));
-                AndroidAppUtils.showLog(TAG, "Device adding... : " + bleDeviceModelsList.size());
-                sendBroadcastMessageToUpdateUI(bleDataModel);
-            } else {
-                final List<BLEDataModel> bleDataModelList = mDeviceAdapter.getBleDeviceModelsList();
-                if (bleDataModelList != null && bleDataModelList.size() > 0) {
-                    for (int i = 0; i < bleDataModelList.size(); i++) {
-                        BLEDataModel mOldBleDataModel = bleDataModelList.get(i);
-                        if (mOldBleDataModel.getMacAddress().equalsIgnoreCase(bleDataModel.getMacAddress())) {
-                            if (!AndroidAppUtils.byteArrayCheckZero(bleDataModel.getStrManufactureData().getBytes())) {
-                                bleDataModelList.set(i, bleDataModel);
-                            } else {
-                                bleDataModel.setStrManufactureData(mOldBleDataModel.getStrManufactureData());
-                                bleDataModelList.set(i, bleDataModel);
-                            }
-
-                        }
-
-                    }
-                    new Handler(Looper.getMainLooper()).post(new Runnable() {
-                        @Override
-                        public void run() {
-                            mDeviceAdapter.setListData((ArrayList<BLEDataModel>) bleDataModelList);
-                            mDeviceAdapter.notifyDataSetChanged();
-                        }
-                    });
-
-                }
-            }
+            setMoreDataToList(bleDataModel);
 
         }
 
@@ -703,7 +769,6 @@ public class BleScanScreen extends Activity {
                 LinearLayoutManager.VERTICAL);
         recyclerView.addItemDecoration(mDividerItemDecoration);
         recyclerView.setAdapter(mDeviceAdapter);
-
 //        recyclerView.addOnItemTouchListener(mDeviceAdapter.getInstanceRecyclerViewTouchListener(recyclerView));
     }
 

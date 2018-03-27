@@ -38,7 +38,7 @@ public interface AppHelper {
     String OPENING_BRACKET = "(";
     String CLOSING_BRACKET = ")";
     String DOUBLE_COLON = ":";
-    String DOT=".";
+    String DOT = ".";
     String NUMBER_ZERO = "0";
     String NUMBER_ONE = "1";
     String DOUBLE_ZERO = "00";
@@ -54,5 +54,11 @@ public interface AppHelper {
     String BEACON_B1 = "B1";
     String BEACON_B4 = "B4";
     String BEACON_B5 = "B5";
-    String DFU_TAG="DFU";
+    String DFU_TAG = "DFU";
+
+    /**
+     * String constant for user note saving feature
+     */
+    String STRING_INITIATE_USER_DATA_TRANSFER = "string_initiate_user_data_transfer";
+    String STRING_SEND_USER_DATA_TRANSFER = "string_send_user_data_transfer";
 }

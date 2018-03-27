@@ -11,7 +11,9 @@ import android.bluetooth.BluetoothProfile;
 import android.content.Intent;
 import android.os.Binder;
 import android.os.Build;
+import android.os.Handler;
 import android.os.IBinder;
+import android.os.Looper;
 import android.support.annotation.RequiresApi;
 import android.util.Log;
 
@@ -64,94 +66,115 @@ public class BluetoothLeService extends Service {
                 broadcastUpdate(intentAction);
             } else if (newState == BluetoothProfile.STATE_DISCONNECTED) {
                 intentAction = GlobalConstant.ACTION_GATT_DISCONNECTED;
-                GlobalConstant.ACTION_PERFORMED=GlobalConstant.ACTION_GATT_DISCONNECTED;
+                GlobalConstant.ACTION_PERFORMED = GlobalConstant.ACTION_GATT_DISCONNECTED;
                 GlobalConstant.CONNECTED_STATE = false;
                 AndroidAppUtils.showErrorLog(TAG, getResources().getString(R.string.Disconnected_from_GATT_server));
 //                broadcastUpdate(intentAction);
                 if (status != BluetoothGatt.GATT_SUCCESS) {
                     refreshDeviceCache(mBluetoothGatt);
                 }
+                if (GlobalConstant.BOOL_IS_SERVICES_DISCOVERED) {
+                    GlobalConstant.BOOL_IS_SERVICES_DISCOVERED = false;
+                }
+                if (GlobalConstant.BOOL_IS_CONNECT_BUTTON_CLICKED)
+                    GlobalConstant.BOOL_IS_CONNECT_BUTTON_CLICKED = false;
+                AndroidAppUtils.showLog(TAG, "\nGlobalConstant.BOOL_IS_DATA_LOGGING_READING_ACTIVITY_VISIBLE :" + GlobalConstant.BOOL_IS_DATA_LOGGING_READING_ACTIVITY_VISIBLE);
+                if (GlobalConstant.BOOL_IS_DATA_LOGGING_READING_ACTIVITY_VISIBLE) {
+                    if (GlobalConstant.mBluetoothConnectionStateInterface != null) {
+                        GlobalConstant.mBluetoothConnectionStateInterface.onGattDisconnected(status);
+                    }
+                }
                 if (status == GlobalConstant.STATUS_CODE_133 || status == GlobalConstant.STATUS_CODE_0) {
                     AndroidAppUtils.hideProgressDialog();
                     AndroidAppUtils.showLog(TAG, getString(R.string.Doing_retry));
-                    AndroidAppUtils.showLog(TAG, "\nGlobalConstant.BOOL_IS_DATA_LOGGING_READING_ACTIVITY_VISIBLE :" + GlobalConstant.BOOL_IS_DATA_LOGGING_READING_ACTIVITY_VISIBLE);
-                    //  Go for  retry
-                    if (GlobalConstant.BOOL_IS_DATA_LOGGING_READING_ACTIVITY_VISIBLE) {
-                        if (GlobalConstant.mBluetoothConnectionStateInterface != null) {
-                            GlobalConstant.mBluetoothConnectionStateInterface.onGattDisconnected(status);
-                        }
-                    } else {
-                        broadcastUpdate(intentAction);
-                    }
-                    if (GlobalConstant.BOOL_IS_TURN_OFF_COMMAND_SEND) {
-                        GlobalConstant.BOOL_IS_TURN_OFF_COMMAND_SEND = false;
-                        if (DeviceAdapter.mConnectionControl != null)
-                            DeviceAdapter.mConnectionControl.removeAllActivityExceptScanning();
-                    }
-                } else if (status == GlobalConstant.STATUS_CODE_8) {
-                    AndroidAppUtils.hideProgressDialog();
-                    AndroidAppUtils.showLog(TAG, getString(R.string.Doing_retry_record_group) +
-                            "\nGlobalConstant.BOOL_IS_DATA_LOGGING_READING_ACTIVITY_VISIBLE :" + GlobalConstant.BOOL_IS_DATA_LOGGING_READING_ACTIVITY_VISIBLE);
-                    //  Go for  retry
-                    if (GlobalConstant.BOOL_IS_DATA_LOGGING_READING_ACTIVITY_VISIBLE) {
-                        if (GlobalConstant.mBluetoothConnectionStateInterface != null) {
-                            GlobalConstant.mBluetoothConnectionStateInterface.onGattDisconnected(status);
-                        }
-                    } else {
-                        if(!GlobalConstant.IS_DFU_OPERATION_STILL_IN_PROCESS)
-                        {
-                            GlobalConstant.IS_NEED_TO_SHOW_DISCONNECT_MESSAGE=true;
-                        }
-                        broadcastUpdate(intentAction);
-                    }
-                    if (GlobalConstant.BOOL_IS_TURN_OFF_COMMAND_SEND) {
-//                        AndroidAppUtils.hideProgressDialog();
-                        GlobalConstant.BOOL_IS_TURN_OFF_COMMAND_SEND = false;
-                        if (DeviceAdapter.mConnectionControl != null)
-                            DeviceAdapter.mConnectionControl.removeAllActivityExceptScanning();
-                    }
-                } else if (status == GlobalConstant.STATUS_CODE_59) {
-                    AndroidAppUtils.hideProgressDialog();
-                    if(!GlobalConstant.IS_DFU_OPERATION_STILL_IN_PROCESS)
-                    {
-                        GlobalConstant.IS_NEED_TO_SHOW_DISCONNECT_MESSAGE=true;
-                    }
+
                     broadcastUpdate(intentAction);
                     if (GlobalConstant.BOOL_IS_TURN_OFF_COMMAND_SEND) {
                         GlobalConstant.BOOL_IS_TURN_OFF_COMMAND_SEND = false;
-                        if (DeviceAdapter.mConnectionControl != null)
-                            DeviceAdapter.mConnectionControl.removeAllActivityExceptScanning();
+                        new Handler(Looper.getMainLooper()).postDelayed(new Runnable() {
+                            @Override
+                            public void run() {
+                                if (DeviceAdapter.mConnectionControl != null)
+                                    DeviceAdapter.mConnectionControl.removeAllActivityExceptScanning();
+                            }
+                        },3000);
+                    }
+                } else if (status == GlobalConstant.STATUS_CODE_8) {
+                    AndroidAppUtils.hideProgressDialog();
+                    AndroidAppUtils.showLog(TAG, getString(R.string.Doing_retry_record_group));
+
+                    broadcastUpdate(intentAction);
+                    if (GlobalConstant.BOOL_IS_TURN_OFF_COMMAND_SEND) {
+//                        AndroidAppUtils.hideProgressDialog();
+                        GlobalConstant.BOOL_IS_TURN_OFF_COMMAND_SEND = false;
+                        new Handler(Looper.getMainLooper()).postDelayed(new Runnable() {
+                            @Override
+                            public void run() {
+                                if (DeviceAdapter.mConnectionControl != null)
+                                    DeviceAdapter.mConnectionControl.removeAllActivityExceptScanning();
+                            }
+                        },3000);
+                    }
+                } else if (status == GlobalConstant.STATUS_CODE_59) {
+                    AndroidAppUtils.hideProgressDialog();
+                    broadcastUpdate(intentAction);
+                    if (GlobalConstant.BOOL_IS_TURN_OFF_COMMAND_SEND) {
+                        GlobalConstant.BOOL_IS_TURN_OFF_COMMAND_SEND = false;
+                        new Handler(Looper.getMainLooper()).postDelayed(new Runnable() {
+                            @Override
+                            public void run() {
+                                if (DeviceAdapter.mConnectionControl != null)
+                                    DeviceAdapter.mConnectionControl.removeAllActivityExceptScanning();
+                            }
+                        },3000);
                     }
 
 
                 } else if (status == GlobalConstant.STATUS_CODE_2) {
                     AndroidAppUtils.hideProgressDialog();
-                    GlobalConstant.IS_NEED_TO_SHOW_DISCONNECT_MESSAGE = true;
                     broadcastUpdate(intentAction);
                     if (GlobalConstant.BOOL_IS_TURN_OFF_COMMAND_SEND) {
                         GlobalConstant.BOOL_IS_TURN_OFF_COMMAND_SEND = false;
-                        if (DeviceAdapter.mConnectionControl != null)
-                            DeviceAdapter.mConnectionControl.removeAllActivityExceptScanning();
+                        new Handler(Looper.getMainLooper()).postDelayed(new Runnable() {
+                            @Override
+                            public void run() {
+                                if (DeviceAdapter.mConnectionControl != null)
+                                    DeviceAdapter.mConnectionControl.removeAllActivityExceptScanning();
+                            }
+                        },3000);
                     }
 
 
                 } else if (status == GlobalConstant.STATUS_CODE_19) {
                     AndroidAppUtils.hideProgressDialog();
-                    if(!GlobalConstant.IS_DFU_OPERATION_STILL_IN_PROCESS)
-                    {
-                        GlobalConstant.IS_NEED_TO_SHOW_DISCONNECT_MESSAGE=true;
-                    }
                     broadcastUpdate(intentAction);
                     if (GlobalConstant.BOOL_IS_TURN_OFF_COMMAND_SEND) {
                         GlobalConstant.BOOL_IS_TURN_OFF_COMMAND_SEND = false;
-                        if (DeviceAdapter.mConnectionControl != null)
-                            DeviceAdapter.mConnectionControl.removeAllActivityExceptScanning();
+                        new Handler(Looper.getMainLooper()).postDelayed(new Runnable() {
+                            @Override
+                            public void run() {
+                                if (DeviceAdapter.mConnectionControl != null)
+                                    DeviceAdapter.mConnectionControl.removeAllActivityExceptScanning();
+                            }
+                        },3000);
+
                     }
 
 
                 } else {
                     AndroidAppUtils.hideProgressDialog();
-                    GlobalConstant.IS_NEED_TO_SHOW_DISCONNECT_MESSAGE = true;
+                    if (GlobalConstant.BOOL_IS_TURN_OFF_COMMAND_SEND) {
+                        GlobalConstant.BOOL_IS_TURN_OFF_COMMAND_SEND = false;
+                        new Handler(Looper.getMainLooper()).postDelayed(new Runnable() {
+                            @Override
+                            public void run() {
+                                if (DeviceAdapter.mConnectionControl != null)
+                                    DeviceAdapter.mConnectionControl.removeAllActivityExceptScanning();
+                            }
+                        },3000);
+
+                    }
+
                     /**
                      * If none of the above case
                      */
@@ -178,7 +201,7 @@ public class BluetoothLeService extends Service {
             if (status == BluetoothGatt.GATT_SUCCESS) {
                 broadcastUpdate(GlobalConstant.ACTION_DATA_AVAILABLE, characteristic);
             } else if (status == BluetoothGatt.GATT_READ_NOT_PERMITTED) {
-               AndroidAppUtils.showToast(AppApplication.getInstance().getCurrentActivity(), getString(R.string.strReadNotPermitted));
+                AndroidAppUtils.showToast(AppApplication.getInstance().getCurrentActivity(), getString(R.string.strReadNotPermitted));
                 broadcastUpdate(GlobalConstant.ACTION_READ_DENIED);
             } else {
                 AndroidAppUtils.showToast(AppApplication.getInstance().getCurrentActivity(), getString(R.string.strReadingFailed));
@@ -225,6 +248,7 @@ public class BluetoothLeService extends Service {
                 AndroidAppUtils.showToast(AppApplication.getInstance().getCurrentActivity(), getString(R.string.strWriteDenied));
                 AndroidAppUtils.showLog(TAG, "Action write denied");
             } else {
+                GlobalConstant.IS_NEED_TO_SHOW_DISCONNECT_MESSAGE = true;
                 broadcastUpdate(GlobalConstant.ACTION_WRITE_FAILED);
                 AndroidAppUtils.showToast(AppApplication.getInstance().getCurrentActivity(), getString(R.string.strWriteFailed));
                 AndroidAppUtils.showLog(TAG, "Action write failed");
@@ -238,6 +262,7 @@ public class BluetoothLeService extends Service {
 
     /**
      * Singlton Instance of BluetoothLeService
+     *
      * @return
      */
     public static BluetoothLeService getInstance() {
@@ -305,9 +330,8 @@ public class BluetoothLeService extends Service {
         }
         // We want to directly connect to the device, so we are setting the autoConnect
         // parameter to false.
-
         mBluetoothGatt = device.connectGatt(this, false, mGattCallback);
-        AndroidAppUtils.showLog(TAG, "Trying to create a new connection. " + mBluetoothGatt.requestConnectionPriority(BluetoothGatt.CONNECTION_PRIORITY_HIGH));
+        AndroidAppUtils.showLog(TAG, "Trying to create a new connection. " /*+ mBluetoothGatt.requestConnectionPriority(BluetoothGatt.CONNECTION_PRIORITY_HIGH)*/);
 
         return true;
     }
@@ -401,7 +425,7 @@ public class BluetoothLeService extends Service {
      */
     public boolean send(byte[] data, BluetoothGattCharacteristic bluetoothGattCharacteristic) {
         if (mBluetoothGatt == null) {
-           AndroidAppUtils.showWarningLog(TAG, "BluetoothGatt not initialized");
+            AndroidAppUtils.showWarningLog(TAG, "BluetoothGatt not initialized");
             return false;
         }
         if (bluetoothGattCharacteristic == null) {

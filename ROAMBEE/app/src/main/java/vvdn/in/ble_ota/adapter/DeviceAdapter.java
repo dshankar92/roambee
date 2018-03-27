@@ -17,7 +17,6 @@ import java.util.Set;
 
 import vvdn.in.ble_ota.AndroidAppUtils;
 import vvdn.in.ble_ota.AppHelper;
-import vvdn.in.ble_ota.view.BleScanScreen;
 import vvdn.in.ble_ota.R;
 import vvdn.in.ble_ota.Utils.CustomRVItemTouchListener;
 import vvdn.in.ble_ota.Utils.GlobalConstant;
@@ -25,6 +24,7 @@ import vvdn.in.ble_ota.blecontrols.BluetoothLeService;
 import vvdn.in.ble_ota.blecontrols.ConnectionControl;
 import vvdn.in.ble_ota.listener.RecyclerViewItemClickListener;
 import vvdn.in.ble_ota.model.BLEDataModel;
+import vvdn.in.ble_ota.view.BleScanScreen;
 
 /**
  * Class Name : Device Adapter
@@ -63,8 +63,7 @@ public class DeviceAdapter extends RecyclerView.Adapter<DeviceAdapter.MyViewHold
      * String holding the name or address on which filter is applied
      */
     private String mStrFilterAppliedDeviceNameAddress = BleScanScreen.etSearchFilter.getText().toString();
-    //    To ensure unique popup on the screen
-    private boolean boolIsPopShowing;
+
 
     public DeviceAdapter(Activity mActivity, BleScanScreen csbListScreen, TextView no_device_found) {
         try {
@@ -102,6 +101,12 @@ public class DeviceAdapter extends RecyclerView.Adapter<DeviceAdapter.MyViewHold
             holder.rlConnect.setTag(holder);
             String strManufactureData = bleDeviceModel.getStrManufactureData();
 
+            if (!csbName.isEmpty() && csbName.toLowerCase().startsWith(AppHelper.DFU_TAG.toLowerCase())) {
+                holder.tvManufactureData.setVisibility(View.GONE);
+            } else {
+                holder.tvManufactureData.setVisibility(View.VISIBLE);
+            }
+
             if (!TextUtils.isEmpty(bleDeviceModel.getStrManufactureData()) && !strManufactureData.equalsIgnoreCase("0")) {
                 holder.rlAdvertisement.setVisibility(View.VISIBLE);
                 CharSequence cs = mActivity.getText(R.string.strManufactureData);
@@ -112,7 +117,10 @@ public class DeviceAdapter extends RecyclerView.Adapter<DeviceAdapter.MyViewHold
                 holder.rlAdvertisement.setVisibility(View.GONE);
             }
             int intRSSIStrength = bleDeviceModel.getStrRssiStrength().isEmpty() ? 0 : Integer.parseInt(bleDeviceModel.getStrRssiStrength());
-//            AndroidAppUtils.showInfoLog(TAG, "intRSSIStrength : " + intRSSIStrength + " csbName : " + csbName);
+/**
+ * Need to show rssi strength value in UI
+ */
+//  AndroidAppUtils.showInfoLog(TAG, "intRSSIStrength : " + intRSSIStrength + " csbName : " + csbName);
             /*if (intRSSIStrength > 22) {
 //                holder.rlConnect.setEnabled(true);
                 holder.rlConnect.setBackgroundColor(mActivity.getResources().getColor(R.color.black));
@@ -144,27 +152,32 @@ public class DeviceAdapter extends RecyclerView.Adapter<DeviceAdapter.MyViewHold
                             (finalBleDeviceModel.getName().startsWith(AppHelper.BEACON_B1) ||
                                     finalBleDeviceModel.getName().startsWith(AppHelper.BEACON_B4) ||
                                     finalBleDeviceModel.getName().startsWith(AppHelper.BEACON_B5)
-                                    || finalBleDeviceModel.getName().startsWith(AppHelper.DFU_TAG))) {
-                        GlobalConstant.IS_NEED_TO_SHOW_DISCONNECT_MESSAGE = true;
-                        GlobalConstant.BOOL_IS_DATA_LOGGING_READING_ACTIVITY_VISIBLE = false;
-                        BluetoothLeService.getInstance().disconnect();
-                        BluetoothLeService.getInstance().close();
-                        BluetoothLeService.getInstance().stopSelf();
-                        GlobalConstant.DEVICE_CONNECTING_NAME = finalBleDeviceModel.getName();
-                        GlobalConstant.CONNECTED_STATE = false;
-                        if (mActivity != null) {
-
-                            if (csbListScreen != null)
-                                csbListScreen.StopBLEScan();
-                            boolIsPopShowing = false;
-                            GlobalConstant.DEVICE_NAME = finalBleDeviceModel.getName();
-                            GlobalConstant.DEVICE_MAC = finalBleDeviceModel.getMacAddress();
+                                    || finalBleDeviceModel.getName().toLowerCase().startsWith(AppHelper.DFU_TAG.toLowerCase()))) {
+                        if (!GlobalConstant.BOOL_IS_CONNECT_BUTTON_CLICKED) {
+                            GlobalConstant.BOOL_IS_CONNECT_BUTTON_CLICKED = true;
+                            GlobalConstant.IS_NEED_TO_SHOW_DISCONNECT_MESSAGE = true;
+                            GlobalConstant.BOOL_IS_DATA_LOGGING_READING_ACTIVITY_VISIBLE = false;
                             if (GlobalConstant.CONNECTED_STATE) {
                                 BluetoothLeService.getInstance().disconnect();
+                                BluetoothLeService.getInstance().close();
+                                BluetoothLeService.getInstance().stopSelf();
                             }
-                            mConnectionControl = new ConnectionControl(mActivity, finalBleDeviceModel.getBleDevice(), mActivity);
-                        } else {
-                            AndroidAppUtils.showLog(TAG, "mActivity is null");
+                            csbListScreen.StopBLEScan();
+                            GlobalConstant.DEVICE_CONNECTING_NAME = finalBleDeviceModel.getName();
+                            if (mActivity != null) {
+
+                                if (csbListScreen != null)
+                                    csbListScreen.StopBLEScan();
+                                GlobalConstant.DEVICE_NAME = finalBleDeviceModel.getName();
+                                GlobalConstant.DEVICE_MAC = finalBleDeviceModel.getMacAddress();
+                                    mConnectionControl = new ConnectionControl(mActivity, finalBleDeviceModel.getBleDevice(), mActivity);
+                            } else {
+                                AndroidAppUtils.showLog(TAG, "mActivity is null");
+                            }
+                        }else
+                        {
+                            AndroidAppUtils.showInfoLog(TAG," GlobalConstant.BOOL_IS_CONNECT_BUTTON_CLICKED : "+
+                                    GlobalConstant.BOOL_IS_CONNECT_BUTTON_CLICKED);
                         }
                     } else {
                         AndroidAppUtils.showToast(mActivity, "Please select beacon device");
@@ -194,24 +207,10 @@ public class DeviceAdapter extends RecyclerView.Adapter<DeviceAdapter.MyViewHold
             tvManufactureData = (TextView) itemView.findViewById(R.id.tvManufactureData);
             rlAdvertisement = (RelativeLayout) itemView.findViewById(R.id.rlAdvertisement);
             rlConnect = (RelativeLayout) itemView.findViewById(R.id.rlConnect);
-//            rlConnect.setOnClickListener(this);
-
         }
 
     }
 
-    /**
-     * Method Name : getBleDeviceModelsList
-     * Description : this method is used for fetching the ble device list
-     *
-     * @return
-     */
-    public ArrayList<BLEDataModel> getBleDeviceModelsList() {
-        if (bleDeviceModelsList != null && bleDeviceModelsList.size() > 0) {
-            return bleDeviceModelsList;
-        }
-        return new ArrayList<>();
-    }
 
     /**
      * Add newly discovered ble device to the former list
@@ -254,9 +253,26 @@ public class DeviceAdapter extends RecyclerView.Adapter<DeviceAdapter.MyViewHold
         } else {
             AndroidAppUtils.showLog(TAG, " Adding device to other list as it doesn't matches : " + bleDataModel.getName());
         }
+        if (boolIsDeviceAlreadyAddedInCurrent) {
+            for (int intCapturedPosition = 0; intCapturedPosition < bleDeviceModelsList.size(); intCapturedPosition++) {
+                BLEDataModel mOlDataModel = bleDeviceModelsList.get(intCapturedPosition);
+                if (mOlDataModel.getMacAddress().toLowerCase().equalsIgnoreCase(bleDataModel.getMacAddress().toLowerCase())) {
+                    if (!AndroidAppUtils.byteArrayCheckZero(bleDataModel.getStrManufactureData().getBytes())) {
+                        this.bleDeviceModelsList.set(intCapturedPosition, bleDataModel);
+                        notifyDataSetChanged();
+                    } else {
+                        bleDataModel.setStrManufactureData(mOlDataModel.getStrManufactureData());
+                        this.bleDeviceModelsList.set(intCapturedPosition, bleDataModel);
+                        notifyDataSetChanged();
+                    }
+                    break;
+                }
+            }
+        }
 
 
     }
+
 
     /**
      * Update the old discovered ble lsit with new one
@@ -265,10 +281,17 @@ public class DeviceAdapter extends RecyclerView.Adapter<DeviceAdapter.MyViewHold
      */
     public void setListData(ArrayList<BLEDataModel> bleDeviceModelsList) {
         this.bleDeviceModelsList = bleDeviceModelsList;
+        notifyDataSetChanged();
+    }
+
+    /**
+     * Update the old discovered ble list with new one
+     *
+     * @param bleDeviceModelsList
+     */
+    public void setCompleteListData(ArrayList<BLEDataModel> bleDeviceModelsList) {
         this.bleDeviceModelsOriginalList = new ArrayList<BLEDataModel>();
         bleDeviceModelsOriginalList.addAll(bleDeviceModelsList);
-//        bleDeviceModelsOriginalList = clearDuplicateEntries(bleDeviceModelsOriginalList);
-        notifyDataSetChanged();
     }
 
     /**
@@ -306,7 +329,7 @@ public class DeviceAdapter extends RecyclerView.Adapter<DeviceAdapter.MyViewHold
      * @param bleOldDataModelsList
      * @return
      */
-    private ArrayList<BLEDataModel> clearDuplicateEntries(ArrayList<BLEDataModel> bleOldDataModelsList) {
+    public ArrayList<BLEDataModel> clearDuplicateEntries(ArrayList<BLEDataModel> bleOldDataModelsList) {
         List<BLEDataModel> al = new ArrayList<>(bleOldDataModelsList);
         // add elements to al, including duplicates
         Set<BLEDataModel> hs = new HashSet<>();

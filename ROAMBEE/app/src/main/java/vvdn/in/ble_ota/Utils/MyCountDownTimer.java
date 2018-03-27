@@ -8,6 +8,7 @@ import vvdn.in.ble_ota.R;
 import vvdn.in.ble_ota.application.AppApplication;
 import vvdn.in.ble_ota.listener.ChoiceDialogClickListener;
 import vvdn.in.ble_ota.listener.SnackBarActionButtonListener;
+import vvdn.in.ble_ota.view.SelectionActivity;
 
 /**
  * ClassName : MyCountDownTimer
@@ -79,6 +80,7 @@ public class MyCountDownTimer extends CountDownTimer {
     public void onTick(long l) {
 
         AndroidAppUtils.showInfoLog(TAG, "Tick Tock Value : " + l);
+
     }
 
     @Override
@@ -102,9 +104,12 @@ public class MyCountDownTimer extends CountDownTimer {
                     }, true);
         } else if (strMessage.equalsIgnoreCase(mActivity.getResources().getString(R.string.str_Fail_to_retrieve_config))) {
             AndroidAppUtils.hideProgressDialog();
+            if (AppApplication.getInstance().getCurrentActivity() != null &&
+                    AppApplication.getInstance().getCurrentActivity() instanceof SelectionActivity)
+                AndroidAppUtils.showSnackBarWithActionButton(AppApplication.getInstance(), strMessage, mSnackBarActionButtonListener);
+        } else if (strMessage.equalsIgnoreCase(mActivity.getResources().getString(R.string.strFailToRetrieveMag))) {
+            AndroidAppUtils.hideProgressDialog();
             AndroidAppUtils.showSnackBarWithActionButton(AppApplication.getInstance(), strMessage, mSnackBarActionButtonListener);
-        } else {
-
         }
 
     }

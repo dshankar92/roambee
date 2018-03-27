@@ -108,6 +108,12 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:visibility="gone" />
+        <include
+            android:id="@+id/rLBeaconB5DataLoggingHeader"
+            layout="@layout/data_logging_beacon_b5_tabular_data_view"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:visibility="gone" />
     </LinearLayout>
 
 
