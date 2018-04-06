@@ -7,309 +7,300 @@
         android:id="@+id/header"
         layout="@layout/header_multi_heading" />
 
-    <RelativeLayout
+    <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_below="@+id/header"
-        android:layout_margin="@dimen/margin_20dp"
-        android:focusable="true"
-        android:focusableInTouchMode="true">
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/header">
 
-        <LinearLayout
-            android:id="@+id/lLPrfTimeout"
+        <RelativeLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/margin_10dp"
-            android:orientation="horizontal">
+            android:layout_height="wrap_content">
 
-            <TextView
-                style="@style/TextView_size_14sp"
+            <RelativeLayout
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="@string/strCaptionTimeout" />
+                android:layout_height="match_parent"
+                android:layout_margin="@dimen/margin_20dp"
+                android:focusable="true"
+                android:focusableInTouchMode="true">
 
-            <Spinner
-                android:id="@+id/prf_timeout_spinner"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:entries="@array/prf_time_out_array" />
-        </LinearLayout>
+                <LinearLayout
+                    android:id="@+id/lLPrfTimeout"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/margin_7dp"
+                    android:orientation="horizontal">
 
-        <LinearLayout
-            android:id="@+id/lLTxPower"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_below="@id/lLPrfTimeout"
-            android:layout_marginTop="@dimen/margin_10dp"
-            android:orientation="horizontal">
+                    <TextView
+                        style="@style/TextView_size_14sp"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="@string/strCaptionTimeout" />
 
-            <TextView
-                style="@style/TextView_size_14sp"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="Tx-Power" />
+                    <Spinner
+                        android:id="@+id/prf_timeout_spinner"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:entries="@array/prf_time_out_array" />
+                </LinearLayout>
 
-            <Spinner
-                android:id="@+id/tx_power_spinner"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:entries="@array/tx_power_array" />
-        </LinearLayout>
+                <LinearLayout
+                    android:id="@+id/lLTxPower"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/lLPrfTimeout"
+                    android:layout_marginTop="@dimen/margin_7dp"
+                    android:orientation="horizontal">
 
-        <LinearLayout
-            android:id="@+id/lLChannel37"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_below="@id/lLTxPower"
-            android:layout_marginTop="@dimen/margin_10dp"
-            android:orientation="horizontal">
+                    <TextView
+                        style="@style/TextView_size_14sp"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="@string/strCaptionTxPower" />
 
-            <TextView
-                style="@style/TextView_size_14sp"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="Channel 37" />
+                    <Spinner
+                        android:id="@+id/tx_power_spinner"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:entries="@array/tx_power_array" />
+                </LinearLayout>
 
-            <Spinner
-                android:id="@+id/channel_37_spinner"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:entries="@array/channel_array" />
-        </LinearLayout>
+                <LinearLayout
+                    android:id="@+id/lLChannel37"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/lLTxPower"
+                    android:layout_marginTop="@dimen/margin_7dp"
+                    android:orientation="horizontal">
 
-        <LinearLayout
-            android:id="@+id/lLChannel38"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_below="@id/lLChannel37"
-            android:layout_marginTop="@dimen/margin_10dp"
-            android:orientation="horizontal">
+                    <TextView
+                        style="@style/TextView_size_14sp"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="@string/strCaptionChannel_37" />
 
-            <TextView
-                style="@style/TextView_size_14sp"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="Channel 38" />
+                    <Spinner
+                        android:id="@+id/channel_37_spinner"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:entries="@array/channel_array" />
+                </LinearLayout>
 
-            <Spinner
-                android:id="@+id/channel_38_spinner"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:entries="@array/channel_array" />
-        </LinearLayout>
+                <LinearLayout
+                    android:id="@+id/lLChannel38"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/lLChannel37"
+                    android:layout_marginTop="@dimen/margin_7dp"
+                    android:orientation="horizontal">
 
-        <LinearLayout
-            android:id="@+id/lLChannel39"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_below="@id/lLChannel38"
-            android:layout_marginTop="@dimen/margin_10dp"
-            android:orientation="horizontal">
+                    <TextView
+                        style="@style/TextView_size_14sp"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="@string/strCaptionChannel38" />
 
-            <TextView
-                style="@style/TextView_size_14sp"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="Channel 39" />
+                    <Spinner
+                        android:id="@+id/channel_38_spinner"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:entries="@array/channel_array" />
+                </LinearLayout>
 
-            <Spinner
-                android:id="@+id/channel_39_spinner"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:entries="@array/channel_array" />
-        </LinearLayout>
+                <LinearLayout
+                    android:id="@+id/lLChannel39"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/lLChannel38"
+                    android:layout_marginTop="@dimen/margin_7dp"
+                    android:orientation="horizontal">
 
-        <LinearLayout
-            android:id="@+id/lLAlsTh"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_below="@id/lLChannel39"
-            android:layout_marginTop="@dimen/margin_10dp"
-            android:orientation="horizontal"
-            android:visibility="gone">
+                    <TextView
+                        style="@style/TextView_size_14sp"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="@string/strCaptionChannel39" />
 
-            <TextView
-                style="@style/TextView_size_14sp"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="@string/strCaptionAmbient"
-                android:textStyle="bold" />
+                    <Spinner
+                        android:id="@+id/channel_39_spinner"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:entries="@array/channel_array" />
+                </LinearLayout>
 
-            <EditText
-                android:id="@+id/als_edittext"
-                android:layout_width="@dimen/layout_widht_0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:inputType="textVisiblePassword"
-                android:maxLength="2" />
-        </LinearLayout>
+                <LinearLayout
+                    android:id="@+id/lLAlsTh"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/lLChannel39"
+                    android:layout_marginTop="@dimen/margin_7dp"
+                    android:orientation="horizontal"
+                    android:visibility="gone">
 
-        <LinearLayout
-            android:id="@+id/lLTamper"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_below="@id/lLAlsTh"
-            android:orientation="horizontal">
+                    <TextView
+                        style="@style/TextView_size_14sp"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="@string/strCaptionAmbient"
+                        android:textStyle="bold" />
 
-            <TextView
-                style="@style/TextView_size_14sp"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="@string/strCaptionTamper" />
+                    <EditText
+                        android:id="@+id/als_edittext"
+                        android:layout_width="@dimen/layout_widht_0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:inputType="textVisiblePassword"
+                        android:maxLength="2" />
+                </LinearLayout>
 
-            <EditText
-                android:id="@+id/temper_edittext"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:inputType="textVisiblePassword"
-                android:maxLength="2" />
-        </LinearLayout>
+                <LinearLayout
+                    android:id="@+id/lLTamper"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/lLAlsTh"
+                    android:layout_marginTop="@dimen/margin_7dp"
+                    android:orientation="horizontal">
 
-        <LinearLayout
-            android:id="@+id/lLDataLoggingInterval"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_below="@id/lLTamper"
-            android:layout_marginTop="@dimen/margin_10dp"
-            android:orientation="horizontal">
+                    <TextView
+                        style="@style/TextView_size_14sp"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="@string/strCaptionTamper" />
 
-            <TextView
-                style="@style/TextView_size_14sp"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="@string/strCaptionDataLoggingTimeInterval" />
+                    <EditText
+                        android:id="@+id/temper_edittext"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:inputType="textVisiblePassword"
+                        android:maxLength="2" />
+                </LinearLayout>
 
-            <Spinner
-                android:id="@+id/login_interval_spinner"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:entries="@array/login_interval_array" />
-        </LinearLayout>
+                <LinearLayout
+                    android:id="@+id/lLDataLoggingInterval"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/lLTamper"
+                    android:layout_marginTop="@dimen/margin_7dp"
+                    android:orientation="horizontal">
 
-        <include
-            android:id="@+id/lLPharmaModeLayout"
-            layout="@layout/pharma_mode_b4_layout"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_below="@id/lLDataLoggingInterval"
-            android:layout_marginTop="@dimen/margin_10dp" />
+                    <TextView
+                        style="@style/TextView_size_14sp"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="@string/strCaptionDataLoggingTimeInterval" />
 
-        <LinearLayout
-            android:id="@+id/lLUserNote"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_below="@id/lLPharmaModeLayout"
-            android:orientation="horizontal">
+                    <Spinner
+                        android:id="@+id/login_interval_spinner"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:entries="@array/login_interval_array" />
+                </LinearLayout>
 
-            <TextView
-                style="@style/TextView_size_14sp"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="@string/strUserNote" />
 
-            <EditText
-                android:id="@+id/user_note_edittext"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:maxLength="19"
-                android:digits="abcdefghijklmnopqrstuvwxyz1234567890 "
-                android:inputType="textVisiblePassword"
-                android:maxLines="1" />
+                <LinearLayout
+                    android:id="@+id/lLUserNote"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/lLDataLoggingInterval"
+                    android:orientation="horizontal">
 
-            <android.support.v7.widget.AppCompatButton
-                android:id="@+id/btnSave"
-                android:layout_weight="0.3"
-                android:layout_width="wrap_content"
-                android:layout_height="30dp"
-                android:textAllCaps="true"
-                android:textColor="@color/black"
-                android:background="@android:drawable/ic_menu_send"
-                android:textStyle="normal" />
-        </LinearLayout>
+                    <TextView
+                        style="@style/TextView_size_14sp"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="@string/strUserNote" />
 
-        <LinearLayout
-            android:id="@+id/lLClearDataLayout"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_below="@id/lLUserNote"
-            android:layout_marginTop="@dimen/margin_10dp"
-            android:gravity="center"
-            android:orientation="horizontal"
-            android:visibility="visible">
+                    <EditText
+                        android:id="@+id/user_note_edittext"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:digits="@string/str_digits_letters"
+                        android:inputType="textVisiblePassword"
+                        android:maxLength="19"
+                        android:maxLines="1" />
 
-            <android.support.v7.widget.AppCompatButton
-                android:id="@+id/btnClearData"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/strCaptionClearData"
-                android:textAllCaps="true"
-                android:textColor="@color/black"
-                android:textSize="@dimen/text_size_14sp"
-                android:textStyle="normal" />
+                    <android.support.v7.widget.AppCompatButton
+                        android:id="@+id/btnSave"
+                        android:layout_width="wrap_content"
+                        android:layout_height="@dimen/btn_save_height"
+                        android:layout_weight="0.3"
+                        android:background="@android:drawable/ic_menu_send"
+                        android:textAllCaps="true"
+                        android:textColor="@color/black"
+                        android:textStyle="normal" />
+                </LinearLayout>
 
-            <android.support.v7.widget.AppCompatButton
-                android:id="@+id/btnResetDevice"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/strCaptionResetDevice"
-                android:textAllCaps="true"
-                android:textColor="@color/black"
-                android:textSize="@dimen/text_size_14sp"
-                android:textStyle="normal" />
-        </LinearLayout>
+                <include
+                    android:id="@+id/lLPharmaModeLayout"
+                    layout="@layout/pharma_mode_b4_layout"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/lLUserNote"
+                    android:layout_marginTop="@dimen/margin_7dp" />
 
-        <!-- <LinearLayout
-             android:id="@+id/lLResetDeviceLayout"
-             android:layout_width="match_parent"
-             android:layout_height="wrap_content"
-             android:layout_below="@id/lLClearDataLayout"
-             android:layout_marginTop="@dimen/margin_10dp"
-             android:gravity="center"
-             android:orientation="horizontal"
-             android:visibility="visible">
+                <LinearLayout
+                    android:id="@+id/lLClearDataLayout"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/lLPharmaModeLayout"
+                    android:layout_marginTop="@dimen/margin_7dp"
+                    android:gravity="center"
+                    android:orientation="horizontal"
+                    android:visibility="visible">
 
-             <android.support.v7.widget.AppCompatButton
-                 android:id="@+id/btnResetDevice"
-                 android:layout_width="wrap_content"
-                 android:layout_height="wrap_content"
-                 android:text="@string/strCaptionResetDevice"
-                 android:textAllCaps="true"
-                 android:textColor="@color/black"
-                 android:textSize="@dimen/text_size_14sp"
-                 android:textStyle="normal" />
-         </LinearLayout>-->
+                    <android.support.v7.widget.AppCompatButton
+                        android:id="@+id/btnClearData"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/strCaptionClearData"
+                        android:textAllCaps="true"
+                        android:textColor="@color/black"
+                        android:textSize="@dimen/text_size_14sp"
+                        android:textStyle="normal" />
 
-        <LinearLayout
-            android:id="@+id/lLButtonLayout"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_below="@id/lLClearDataLayout"
-            android:layout_marginTop="@dimen/margin_20dp"
-            android:orientation="horizontal">
+                    <android.support.v7.widget.AppCompatButton
+                        android:id="@+id/btnResetDevice"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/strCaptionResetDevice"
+                        android:textAllCaps="true"
+                        android:textColor="@color/black"
+                        android:textSize="@dimen/text_size_14sp"
+                        android:textStyle="normal" />
+                </LinearLayout>
 
-            <Button
-                android:id="@+id/send_button"
-                android:layout_width="@dimen/layout_widht_0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="@dimen/margin_15dp"
-                android:layout_weight="1"
-                android:text="send" />
-        </LinearLayout>
-    </RelativeLayout>
+                <LinearLayout
+                    android:id="@+id/lLButtonLayout"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/lLClearDataLayout"
+                    android:layout_marginTop="@dimen/margin_15dp"
+                    android:orientation="horizontal">
+
+                    <Button
+                        android:id="@+id/send_button"
+                        android:layout_width="@dimen/layout_widht_0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="@dimen/margin_15dp"
+                        android:layout_weight="1"
+                        android:text="@string/strCaptionSend" />
+                </LinearLayout>
+            </RelativeLayout>
+        </RelativeLayout>
+    </ScrollView>
 </RelativeLayout>

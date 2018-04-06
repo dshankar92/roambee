@@ -43,10 +43,10 @@
             android:layout_width="fill_parent"
             android:layout_height="match_parent"
             android:hint="@string/strFilterCaption"
-            android:inputType="text"
             android:lines="1"
             android:textColor="@color/black"
             android:textColorHint="@color/card_bg"
+            android:inputType="textVisiblePassword"
             android:textSize="15sp" />
     </android.support.design.widget.TextInputLayout>
 

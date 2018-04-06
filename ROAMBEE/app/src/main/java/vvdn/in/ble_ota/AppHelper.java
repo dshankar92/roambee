@@ -15,7 +15,7 @@ public interface AppHelper {
     /*LATEST ROAM BEE DETAILS*/
     /*OTA*/
     String serviceUUIDDFU = "8e400001-f315-4f60-9fb8-838830daea50";
-    String WitreCharacteristicsClearDFU = "8e400001-f315-4f60-9fb8-838830daea50";
+    String WriteCharacteristicsClearDFU = "8e400001-f315-4f60-9fb8-838830daea50";
     String serviceUUIDOTA = "0000fe59-0000-1000-8000-00805f9b34fb";
     String WriteCharacteristicsROAMBEE = "8ec90002-f315-4f60-9fb8-838830daea50";
 
@@ -39,6 +39,8 @@ public interface AppHelper {
     String CLOSING_BRACKET = ")";
     String DOUBLE_COLON = ":";
     String DOT = ".";
+    String FORWARD_SLASH = "/";
+    String UNDER_SCORE = "_";
     String NUMBER_ZERO = "0";
     String NUMBER_ONE = "1";
     String DOUBLE_ZERO = "00";
@@ -47,6 +49,8 @@ public interface AppHelper {
     String ZERO_THREE = "03";
     String ZERO_FOUR = "04";
     String ZERO_FIVE = "05";
+    String ZERO_SIX = "06";
+    String ZERO_SEVEN = "07";
 
     /**
      * String Constant depicting beacon type

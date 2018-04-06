@@ -6,7 +6,7 @@ android {
 
     defaultConfig {
         applicationId "vvdn.in.ble_ota"
-        minSdkVersion 18
+        minSdkVersion 19
         targetSdkVersion 22
         versionCode 1
         versionName "1.3"
@@ -32,6 +32,4 @@ dependencies {
     compile 'no.nordicsemi.android:log:2.1.1'
     compile 'in.gauriinfotech:commons:1.0.8'
     compile 'no.nordicsemi.android.support.v18:scanner:1.0.0'
-
-
 }

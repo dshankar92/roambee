@@ -11,14 +11,20 @@
     <!-- Text View -->
     <style name="TextView_size_14sp" parent="Theme.AppCompat.Light.NoActionBar">
         <item name="android:textStyle" >bold</item>
-        <item name="android:textSize">14sp</item>
+        <item name="android:textSize">@dimen/text_size_14sp</item>
+        <item name="android:textColor">@color/black</item>
+    </style>
+    <!-- Text View -->
+    <style name="TextView_size_17sp" parent="Theme.AppCompat.Light.NoActionBar">
+        <item name="android:textStyle" >bold</item>
+        <item name="android:textSize">@dimen/text_size_17sp</item>
         <item name="android:textColor">@color/black</item>
     </style>
 
     <!-- Text View -->
     <style name="TextView_size_20sp" parent="Theme.AppCompat.Light.NoActionBar">
         <item name="android:textStyle" >bold</item>
-        <item name="android:textSize">20sp</item>
+        <item name="android:textSize">@dimen/text_size_20sp</item>
         <item name="android:textColor">@color/white</item>
         <item name="android:textAllCaps">true</item>
     </style>

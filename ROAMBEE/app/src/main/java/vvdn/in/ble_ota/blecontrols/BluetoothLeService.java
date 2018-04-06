@@ -30,6 +30,7 @@ import vvdn.in.ble_ota.adapter.DeviceAdapter;
 import vvdn.in.ble_ota.application.AppApplication;
 import vvdn.in.ble_ota.view.ChangeConfigurationActivity;
 import vvdn.in.ble_ota.view.DataLoggingReadingActivity;
+import vvdn.in.ble_ota.view.DeviceInformationScreen;
 import vvdn.in.ble_ota.view.SelectionActivity;
 
 /**
@@ -240,6 +241,9 @@ public class BluetoothLeService extends Service {
                 }
                 if (ChangeConfigurationActivity.mDataLoggingListener != null) {
                     ChangeConfigurationActivity.mDataLoggingListener.OnDataLoggingWriteCharacteristicsDiscovered(getString(R.string.strSuccessCaption));
+                }
+                if (DeviceInformationScreen.mDataLoggingListener != null) {
+                    DeviceInformationScreen.mDataLoggingListener.OnDataLoggingWriteCharacteristicsDiscovered(getString(R.string.strSuccessCaption));
                 }
 
 

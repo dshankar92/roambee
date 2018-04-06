@@ -17,12 +17,9 @@ import android.content.ServiceConnection;
 import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
-import android.os.Looper;
 import android.support.annotation.RequiresApi;
 import android.support.v4.content.LocalBroadcastManager;
 import android.text.TextUtils;
-import android.view.ContextThemeWrapper;
-import android.view.WindowManager;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -42,6 +39,7 @@ import vvdn.in.ble_ota.listener.DataLoggingListener;
 import vvdn.in.ble_ota.listener.SnackBarActionButtonListener;
 import vvdn.in.ble_ota.view.ChangeConfigurationActivity;
 import vvdn.in.ble_ota.view.DataLoggingReadingActivity;
+import vvdn.in.ble_ota.view.DeviceInformationScreen;
 import vvdn.in.ble_ota.view.DfuActivityOperation;
 import vvdn.in.ble_ota.view.SelectionActivity;
 
@@ -498,7 +496,6 @@ public class ConnectionControl {
                 AndroidAppUtils.showLog(TAG, "Service UUID:  " + Service_UUID);
               /*  OAD SERVICE*/
                 if (Service_UUID.equalsIgnoreCase(AppHelper.serviceUUIDDFU)) {
-
                     AndroidAppUtils.showLog(TAG, " *** DEVICE_PACKET_DATA_SERVICE_UUID WRITE***" + AppHelper.DEVICE_PACKET_DATA_SERVICE_WRITE_UUID);
                     List<BluetoothGattCharacteristic> gattCharacteristics = mGattService.getCharacteristics();
                     if (gattCharacteristics != null) {
@@ -506,15 +503,15 @@ public class ConnectionControl {
                         for (BluetoothGattCharacteristic mBlueGattCharacteristic : gattCharacteristics) {
                             String characteristics_UUID = mBlueGattCharacteristic.getUuid().toString();
                             AndroidAppUtils.showLog(TAG, "characteristics UUID : " + characteristics_UUID);
-                            if (characteristics_UUID.equalsIgnoreCase(AppHelper.WitreCharacteristicsClearDFU)) {
-                                AndroidAppUtils.showLog(TAG, "Firmware revision Number Characteristics Found");
+                            if (characteristics_UUID.equalsIgnoreCase(AppHelper.WriteCharacteristicsClearDFU)) {
+                                AndroidAppUtils.showLog(TAG, "AppHelper.WriteCharacteristicsClearDFU characteristics found");
                                 dfu_ota_clear_characteristics = mBlueGattCharacteristic;
                                 isCharacteristicsFound = true;
-//                                mBluetoothLeService.readCharacteristic(mBlueGattCharacteristic);
+                                break;
                             }
                         }
                     } else {
-                        AndroidAppUtils.showErrorLog(TAG, "DFU Services or Characteristics Not Found");
+                        AndroidAppUtils.showErrorLog(TAG, "DFU Services or AppHelper.WriteCharacteristicsClearDFU Characteristics Not Found");
                         break;
                     }
                 }
@@ -534,18 +531,13 @@ public class ConnectionControl {
                             String characterstics_UUID = mBlueGattCharacteristic.getUuid().toString();
 
                             if (characterstics_UUID.equalsIgnoreCase(AppHelper.WriteCharacteristics_FILE_DATA)) {
-                                AndroidAppUtils.showLog(TAG, "Firmware revision Number Characteristics Found");
-//                                enableNotification(mBlueGattCharacteristic);
+                                AndroidAppUtils.showLog(TAG, "AppHelper.WriteCharacteristics_FILE_DATA Characteristics Found");
                                 dfu_ota_clear_characteristics = null;
                                 dl_write_characteristics = null;
                                 dl_notification_characteristics = null;
                                 dfu_ota_file_characteristics = mBlueGattCharacteristic;
                                 isCharacteristicsFound = true;
                             } else if (characterstics_UUID.equalsIgnoreCase(AppHelper.WriteCharacteristics_META_DATA)) {
-                                /**
-                                 * Disable Notification for all DFU feature need to enable whe packet writing in process
-                                 */
-//                                enableNotification(mBlueGattCharacteristic);
                                 dfu_ota_meta_characteristics = mBlueGattCharacteristic;
                                 isCharacteristicsFound = true;
                             } else {
@@ -565,8 +557,6 @@ public class ConnectionControl {
                         AndroidAppUtils.showLog(TAG, "DIS characteristics UUID: " + gattCharacteristics.get(i).getUuid().toString());
                     }
                     if (gattCharacteristics != null) {
-                        // loop for characteristics
-                        AndroidAppUtils.showLog(TAG, " DIS Characteristics Size :" + gattCharacteristics.size());
                         for (BluetoothGattCharacteristic mBlueGattCharacteristic : gattCharacteristics) {
                             String characteristics_UUID = mBlueGattCharacteristic.getUuid().toString();
                             /*DATA  to written for fetching value from device*/
@@ -608,8 +598,6 @@ public class ConnectionControl {
                     } else {
                         AndroidAppUtils.showLog(TAG, "Could Not Navigate to other screen");
                     }
-                    AndroidAppUtils.showLog(TAG, "isDisconnectionPopupShowing : " + isDisconnectionPopupShowing + "\n"
-                            + "  GlobalConstant.boolIsDataLoggingActivityVisible  : " + GlobalConstant.boolIsDataLoggingActivityVisible);
                 }
                 /**
                  * Check for Data logging service and characteristics for reading logged data
@@ -621,8 +609,6 @@ public class ConnectionControl {
                     } else {
                         AndroidAppUtils.showLog(TAG, "Could Not Navigate to other screen");
                     }
-                    AndroidAppUtils.showLog(TAG, "isDisconnectionPopupShowing : " + isDisconnectionPopupShowing + "\n"
-                            + "  GlobalConstant.boolIsDataLoggingActivityVisible  : " + GlobalConstant.boolIsDataLoggingActivityVisible);
                 }
                 /**
                  * Check for dfu service and characteristics for performing upgradable operation
@@ -634,11 +620,12 @@ public class ConnectionControl {
                     } else {
                         AndroidAppUtils.showErrorLog(TAG, "Could Not Navigate to other screen");
                     }
-                    AndroidAppUtils.showLog(TAG, "isDisconnectionPopupShowing : " + isDisconnectionPopupShowing + "\n"
-                            + "  GlobalConstant.boolIsDataLoggingActivityVisible  : " + GlobalConstant.boolIsDataLoggingActivityVisible);
+
                 } else {
                     AndroidAppUtils.showLog(TAG, "Neither Data Logging nor DFU Notification and Write characteristics Not found");
                 }
+                AndroidAppUtils.showLog(TAG, "isDisconnectionPopupShowing : " + isDisconnectionPopupShowing + "\n"
+                        + "  GlobalConstant.boolIsDataLoggingActivityVisible  : " + GlobalConstant.boolIsDataLoggingActivityVisible);
             }
         } else {
             AndroidAppUtils.showLog(TAG, "All services discovered ");
@@ -661,8 +648,8 @@ public class ConnectionControl {
                                     displayGattServices(mBluetoothLeService.getSupportedGattServices());
                                 }
                             } else {
-
-                                BluetoothLeService.getInstance().disconnect();
+                                if (BluetoothLeService.getInstance() != null)
+                                    BluetoothLeService.getInstance().disconnect();
                             }
                         }
                     });
@@ -716,6 +703,9 @@ public class ConnectionControl {
                     }
                     if (ChangeConfigurationActivity.mDataLoggingListener != null) {
                         ChangeConfigurationActivity.mDataLoggingListener.OnNotificationReceived(byteData);
+                    }
+                    if (DeviceInformationScreen.mDataLoggingListener != null) {
+                        DeviceInformationScreen.mDataLoggingListener.OnNotificationReceived(byteData);
                     }
                 }
             }
@@ -792,7 +782,6 @@ public class ConnectionControl {
      * To show device is not compatible
      */
     private void showInCompatiblePopUp() {
-
         if (mActivity != null) {
             if (!(mActivity instanceof BleScanScreen))
                 AndroidAppUtils.showSnackBar(AppApplication.getInstance(), mActivity.getString(R.string.not_campatible));
@@ -829,24 +818,18 @@ public class ConnectionControl {
      */
     public BluetoothGattCharacteristic getCharacteristicFromUUID(String UUID) {
         BluetoothGattCharacteristic bluetoothGattCharacteristic = null;
-
         for (BluetoothGattService gattService : gattServicesList) {
-
             List<BluetoothGattCharacteristic> gattCharacteristics =
                     gattService.getCharacteristics();
-
             // Loops through available Characteristics.
             for (BluetoothGattCharacteristic gattCharacteristic : gattCharacteristics) {
-
                 String uuid = gattCharacteristic.getUuid().toString();
-
                 if (uuid.equalsIgnoreCase(UUID)) {
                     bluetoothGattCharacteristic = gattCharacteristic;
                     return bluetoothGattCharacteristic;
                 }
             }
         }
-
         return bluetoothGattCharacteristic;
     }
 
@@ -1046,54 +1029,7 @@ public class ConnectionControl {
 
                     }
                 }, false);
-        /*if (mActivity != null) {
-            final AlertDialog.Builder builder = new AlertDialog.Builder(new ContextThemeWrapper(mActivity, R.style.AlertDialogCustom));
-            builder.setTitle(R.string.app_name);
-            builder.setMessage(msg);
-            builder.setCancelable(false);
-            builder.setPositiveButton(buttonMsg,
-                    new DialogInterface.OnClickListener() {
 
-                        @SuppressWarnings("static-access")
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            isDisconnectionPopupShowing = false;
-                            alertDialog.dismiss();
-                            alertDialog = null;
-                            removeAllActivityExceptScanning();
-                            if (AppApplication.getInstance().getCurrentActivity() != null && AppApplication.getInstance().getCurrentActivity() instanceof BleScanScreen) {
-                                ((BleScanScreen) (AppApplication.getInstance().getCurrentActivity())).checkBluetoothAndGPS();
-                            }
-
-                        }
-                    });
-
-            new Handler(Looper.getMainLooper()).post(new Runnable() {
-                @Override
-                public void run() {
-                    if (alertDialog == null) {
-                        alertDialog = builder.create();
-                        alertDialog.getWindow().setType(WindowManager.LayoutParams.TYPE_SYSTEM_ALERT);
-                        AndroidAppUtils.showLog(TAG, "mActivity.getCurrentActivity() : " + mActivity.getCurrentActivity().getClass().getSimpleName());
-                        if (!mActivity.getCurrentActivity().isFinishing()) {
-                            try {
-                                if (alertDialog != null && !isDisconnectionPopupShowing && !alertDialog.isShowing()) {
-                                    isDisconnectionPopupShowing = true;
-                                    alertDialog.show();
-                                }
-                            } catch (Exception e) {
-                                AndroidAppUtils.showLog(TAG, "error message while showing dialog " + e.getMessage());
-                            }
-                        }
-                    } else {
-                        AndroidAppUtils.showErrorLog(TAG, " Alert Dialog is already showing");
-//                        alertDialog = null;
-                    }
-                }
-            });
-        } else {
-            AndroidAppUtils.showLog(TAG, " mActivity is null");
-        }*/
     }
 
     /**

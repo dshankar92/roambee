@@ -3,10 +3,8 @@ package vvdn.in.ble_ota.Utils;
 import android.os.Environment;
 import android.util.Log;
 
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
@@ -21,10 +19,12 @@ import vvdn.in.ble_ota.AndroidAppUtils;
 public class FileLogHelper {
     private static final String cmdBegin = "logcat -f ";
     private static final boolean shouldLog = true; //TODO: set to false in final version of the app
-    private static final String TAG = "FileLogHelper";
+    private static final String TAG = FileLogHelper.class.getSimpleName();
 
     private String logFileAbsolutePath;
     private String cmdEnd = "color *:F";
+
+
     private boolean isLogStarted = false;
     private static FileLogHelper mInstance;
 
@@ -38,6 +38,11 @@ public class FileLogHelper {
         return mInstance;
     }
 
+    /**
+     * Method Name :initializeLogDataLocation
+     * Description : This method is used for initializing the path for file
+     * where captured logcat will be saved
+     */
     public void initLog() {
         if (!isLogStarted && shouldLog) {
             SimpleDateFormat dF = new SimpleDateFormat("yy-MM-dd_HH_mm''ss", Locale.getDefault());
@@ -50,19 +55,28 @@ public class FileLogHelper {
         }
     }
 
+
+
+    /**
+     * Method Name : startFilterLog
+     * Description : This method is used for starting capturing of logcat data
+     * and write to file
+     */
     private void startLog() {
         if (shouldLog) {
             try {
                 File prevLogFile = new File(logFileAbsolutePath);
                 prevLogFile.delete();
+
                 Runtime.getRuntime().exec(cmdBegin + logFileAbsolutePath + cmdEnd);
-                AndroidAppUtils.showErrorLog(TAG, "cmdEnd : " + cmdEnd);
+                AndroidAppUtils.showErrorLog(TAG, "cmdBegin + logFileAbsolutePath + cmdEnd : " + cmdBegin + logFileAbsolutePath + cmdEnd);
                 isLogStarted = true;
             } catch (IOException ignored) {
-                Log.e(TAG, "initLogCat: failed");
+                AndroidAppUtils.showErrorLog(TAG, "initLogCat: failed");
             }
         }
     }
+
 
 
     /**
@@ -83,6 +97,8 @@ public class FileLogHelper {
             }
         }
     }
+
+
 
     /**
      * Add a new tag to file log with default priority, which is Verbose.

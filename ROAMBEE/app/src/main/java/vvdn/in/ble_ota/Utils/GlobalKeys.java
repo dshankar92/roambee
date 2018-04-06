@@ -46,6 +46,14 @@ public class GlobalKeys {
      * String Constant for holding the file or record id
      */
     public static final String FILE_RECORD_ID_INDEX = "0001";
+    /**
+     * String Constant for caption beacon type folder
+     */
+    public static final String BEACON_TYPE = "beacon";
+    public static final String BEACON_TYPE_B1 = "beacon_b1";
+    public static final String BEACON_TYPE_B4 = "beacon_b4";
+    public static final String BEACON_TYPE_B5 = "beacon_b5";
+    public static final String ROAMBEE_CAPTION="roambee";
 
 
 

@@ -5,6 +5,7 @@
     <uses-permission android:name="android.permission.BLUETOOTH" />
     <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.READ_PHONE_STATE" />
@@ -56,6 +57,9 @@
         <activity
             android:name=".dfu.NotificationActivity"
             android:label="@string/dfu_feature_title" />
+        <activity
+            android:name=".view.DeviceInformationScreen"
+            android:screenOrientation="portrait" />
         <service
             android:name=".dfu.DfuService"
             android:exported="true"

@@ -109,7 +109,7 @@ public class MyCountDownTimer extends CountDownTimer {
                 AndroidAppUtils.showSnackBarWithActionButton(AppApplication.getInstance(), strMessage, mSnackBarActionButtonListener);
         } else if (strMessage.equalsIgnoreCase(mActivity.getResources().getString(R.string.strFailToRetrieveMag))) {
             AndroidAppUtils.hideProgressDialog();
-            AndroidAppUtils.showSnackBarWithActionButton(AppApplication.getInstance(), strMessage, mSnackBarActionButtonListener);
+//            AndroidAppUtils.showSnackBarWithActionButton(AppApplication.getInstance(), strMessage, mSnackBarActionButtonListener);
         }
 
     }

@@ -47,6 +47,7 @@ import java.util.ArrayList;
 import vvdn.in.ble_ota.AndroidAppUtils;
 import vvdn.in.ble_ota.AppHelper;
 import vvdn.in.ble_ota.R;
+import vvdn.in.ble_ota.Utils.FileLogHelper;
 import vvdn.in.ble_ota.Utils.GlobalConstant;
 import vvdn.in.ble_ota.adapter.DeviceAdapter;
 import vvdn.in.ble_ota.application.AppApplication;
@@ -64,6 +65,7 @@ public class BleScanScreen extends Activity {
      * Debuggable TAG
      */
     private static final String TAG = BleScanScreen.class.getSimpleName();
+    private static final String LOG_TAG = BleScanScreen.class.getSimpleName() + "Filter ";
     /**
      * Constant Code
      */
@@ -184,6 +186,7 @@ public class BleScanScreen extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         init();
+
     }
 
     /**
@@ -245,7 +248,7 @@ public class BleScanScreen extends Activity {
 
 
         if (!BluetoothAdapter.getDefaultAdapter().isMultipleAdvertisementSupported()) {
-            AndroidAppUtils.showInfoLog(TAG, "Multiple advertisement not supported");
+            AndroidAppUtils.showLog(TAG, "Multiple advertisement not supported");
         }
     }
 
@@ -389,7 +392,7 @@ public class BleScanScreen extends Activity {
         etSearchFilter.setOnEditorActionListener(new TextView.OnEditorActionListener() {
             public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
                 if ((event != null && (event.getKeyCode() == KeyEvent.KEYCODE_ENTER)) || (actionId == EditorInfo.IME_ACTION_DONE)) {
-                    AndroidAppUtils.showInfoLog(TAG, "Enter pressed");
+                    AndroidAppUtils.showLog(TAG, "Enter pressed");
                     AndroidAppUtils.hideKeyboard(mActivity, etSearchFilter);
                 }
                 return false;
@@ -598,6 +601,9 @@ public class BleScanScreen extends Activity {
             bleDataModel.setMacAddress(address);
             bleDataModel.setBleDevice(device);
             bleDataModel.setStrRssiStrength(rssiPercent + "");
+
+            AndroidAppUtils.showInfoLog(TAG, "Name : " + name +
+                    "\n ManufactureData : " + fetchManufactureData(scanRecord, name) + "\n");
             bleDataModel.setStrManufactureData(fetchManufactureData(scanRecord, name));
             setMoreDataToList(bleDataModel);
 
@@ -617,10 +623,13 @@ public class BleScanScreen extends Activity {
         String strManufactureData = "";
         if (scanRecord != null && scanRecord.length > 0) {
             for (int i = 0; i < scanRecord.length; i++) {
+                /**
+                 * Index representing beacon type in manufacture data
+                 */
                 if (i == 15) {
                     int intTotalMFByteIndex = 9;
                     byte[] mByteData;
-                    AndroidAppUtils.showInfoLog(TAG, "scanRecord[i] : " + scanRecord[i] +
+                    AndroidAppUtils.showLog(TAG, "scanRecord[i] : " + scanRecord[i] +
                             "\n scanRecord[i] : " + (scanRecord[i] & 0xFF));
                     if (scanRecord[i] == 01) {
                         intTotalMFByteIndex = 10;
@@ -632,7 +641,7 @@ public class BleScanScreen extends Activity {
                     mByteData = new byte[intTotalMFByteIndex];
 
                     System.arraycopy(scanRecord, i - 5, mByteData, 0, intTotalMFByteIndex);
-                    AndroidAppUtils.showInfoLog(TAG, "start data : " + AndroidAppUtils.convertToHexString(mByteData));
+                    AndroidAppUtils.showLog(TAG, "start data : " + AndroidAppUtils.convertToHexString(mByteData));
                     strManufactureData = AndroidAppUtils.convertToHexString(mByteData);
                 }
             }

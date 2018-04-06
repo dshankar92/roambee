@@ -38,7 +38,7 @@ public class SelectionActivity extends Activity implements View.OnClickListener 
     /**
      * Button reference object
      */
-    private Button btn_upgrade, btn_data_logging, btnChangeConfiguration;
+    private Button btn_upgrade, btn_data_logging, btnChangeConfiguration, btnDeviceInformation;
     /**
      * Activity reference object
      */
@@ -107,6 +107,8 @@ public class SelectionActivity extends Activity implements View.OnClickListener 
         btn_data_logging = (Button) findViewById(R.id.btn_data_logging);
         btn_upgrade = (Button) findViewById(R.id.btn_upgrade);
         btnChangeConfiguration = (Button) findViewById(R.id.btnChangeConfiguration);
+        btnDeviceInformation = (Button) findViewById(R.id.btnDeviceInformation);
+        btnDeviceInformation.setOnClickListener(this);
         btn_upgrade.setOnClickListener(this);
         btn_data_logging.setOnClickListener(this);
         btnChangeConfiguration.setOnClickListener(this);
@@ -187,6 +189,11 @@ public class SelectionActivity extends Activity implements View.OnClickListener 
                 GlobalConstant.BOOL_IS_NEED_TO_RETRIEVE_DATA = false;
                 startActivity(new Intent(mActivity, ChangeConfigurationActivity.class));
                 break;
+            case R.id.btnDeviceInformation:
+                mDataLoggingListener = null;
+                GlobalConstant.BOOL_IS_NEED_TO_RETRIEVE_DATA = false;
+                startActivity(new Intent(mActivity, DeviceInformationScreen.class));
+                break;
         }
     }
 
@@ -200,13 +207,13 @@ public class SelectionActivity extends Activity implements View.OnClickListener 
             final byte[] byteBootLoader = {(byte) 0x01};
             if (DeviceAdapter.mConnectionControl != null && ConnectionControl.connectionControl != null) {
 //                AndroidAppUtils.showProgressDialog(mActivity, "Please Wait...", false);
-                DeviceAdapter.mConnectionControl.enableNotification(ConnectionControl.connectionControl.getCharacteristicFromUUID(AppHelper.WitreCharacteristicsClearDFU));
+                DeviceAdapter.mConnectionControl.enableNotification(ConnectionControl.connectionControl.getCharacteristicFromUUID(AppHelper.WriteCharacteristicsClearDFU));
                 new Handler(Looper.getMainLooper()).postDelayed(new Runnable() {
                     @Override
                     public void run() {
                         GlobalConstant.BOOL_COMMAND_FOR_BOOT_LOADER_SENT = true;
                         DeviceAdapter.mConnectionControl.writeFileToDevice
-                                (ConnectionControl.connectionControl.getCharacteristicFromUUID(AppHelper.WitreCharacteristicsClearDFU), byteBootLoader);
+                                (ConnectionControl.connectionControl.getCharacteristicFromUUID(AppHelper.WriteCharacteristicsClearDFU), byteBootLoader);
                     }
                 }, 1000);
 
@@ -240,6 +247,9 @@ public class SelectionActivity extends Activity implements View.OnClickListener 
         HeaderViewClickListener headerViewClickListener = new HeaderViewClickListener() {
             @Override
             public void onClickOfHeaderLeftView() {
+                if (myCountDownTimer != null) {
+                    myCountDownTimer.cancel();
+                }
                 onBackPressed();
             }
 

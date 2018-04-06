@@ -1,12 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical" android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
     <LinearLayout
         android:id="@+id/lLPharmaMode"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/margin_10dp"
+        android:layout_marginTop="@dimen/margin_7dp"
         android:orientation="horizontal">
 
         <TextView
@@ -28,6 +30,7 @@
         android:id="@+id/lLPharmaModeDelay"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/margin_7dp"
         android:orientation="horizontal">
 
         <TextView
@@ -44,5 +47,22 @@
             android:layout_weight="1"
             android:inputType="textVisiblePassword"
             android:maxLength="4" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/lLButtonLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/lLPharmaModeDelay"
+        android:layout_marginTop="@dimen/margin_20dp"
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/reset_pharma_button"
+            android:layout_width="@dimen/layout_widht_0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/margin_15dp"
+            android:layout_weight="1"
+            android:text="@string/strReset_Pharma_Mode" />
     </LinearLayout>
 </LinearLayout>

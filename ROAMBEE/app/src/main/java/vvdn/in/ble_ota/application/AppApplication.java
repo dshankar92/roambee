@@ -51,7 +51,6 @@ public class AppApplication extends Application {
 
     @Override
     protected void attachBaseContext(Context base) {
-
         super.attachBaseContext(base);
     }
 
@@ -229,21 +228,5 @@ public class AppApplication extends Application {
         super.onTerminate();
     }
 
-  /*  public void addActivityToGlobalList(Activity mActivity) {
-        if (GlobalConstant.mGlobalActivityArrayList != null) {
-            if (GlobalConstant.mGlobalActivityArrayList.size() > 0) {
-                for (int i = 0; i <GlobalConstant.mGlobalActivityArrayList.size() ; i++) {
-                    if(mActivity instanceof (GlobalConstant.mGlobalActivityArrayList.get(i)))
-                    {
 
-                    }
-                }
-            } else {
-
-            }
-
-        } else {
-            AndroidAppUtils.showWarningLog(TAG, "GlobalConstant.mGlobalActivityArrayList is null");
-        }
-    }*/
 }

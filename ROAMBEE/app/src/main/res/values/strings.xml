@@ -124,7 +124,6 @@
     <string name="BLE_Connection_State">BLE  Connection State :</string>
 
 
-
     <string name="mConnectionControl_is_null_during_retry">mConnectionControl is null during retry.</string>
     <string name="ConnectionError">Connection Error</string>
     <string name="please_try_again">Please Try Again.</string>
@@ -158,6 +157,10 @@
     <string name="strSelectionScreenCaption">SELECTION SCREEN</string>
     <string name="strEnteredBootLoaderModeCaption">Entered BootLoader Mode</string>
     <string name="str_Fail_to_retrieve_config">Fail to Retrieve Configuration</string>
+    <string name="str_device_information">Device Information</string>
+    <string name="str_change_configuration">Change Configuration</string>
+    <string name="str_data_logging">Data Logging</string>
+    <string name="str_upgrade">Upgrade</string>
 
 
     <!--DFU UPGRADE SCREEN ACTIVITY-->
@@ -193,6 +196,13 @@
     <string name="strCaptionSave">Save</string>
     <string name="strUserNoteSaveSuccessMsg">User Note Save Successfully</string>
     <string name="strFailToRetrieveMag">Fail to Retrieve User Data</string>
+    <string name="strCaptionSend">send</string>
+    <string name="strReset_Pharma_Mode">Reset Pharma Mode</string>
+    <string name="strCaptionTxPower">Tx-Power</string>
+    <string name="strCaptionChannel_37">Channel 37</string>
+    <string name="strCaptionChannel38">Channel 38</string>
+    <string name="strCaptionChannel39">Channel 39</string>
+    <string name="strResetPharmaModeMsg">Reset Pharma Mode Command Send Successfully</string>
 
 
     <!--DATA LOGGING ACTIVITY-->
@@ -221,6 +231,7 @@
     <string name="scan_devices">Scanning devices&#8230;</string>
     <string name="strCaptionConnecting">Connecting&#8230;</string>
     <string name="strRetrieveUserNote">Retrieving User Notes&#8230;</string>
+    <string name="strRetrieveDeviceInfo">Retrieving Device Information&#8230;</string>
 
     <!--PROGRESS DIALOG TEXT-->
     <string name="strWarningCaption">WARNING</string>
@@ -246,6 +257,16 @@
     <string name="strShockCaption">Shock</string>
     <string name="strTiltAngelCaption">Tilt Angel</string>
 
+
+    <!--DEVICE INFORMATION SCREEN-->
+    <string name="str_device_name">Device Name</string>
+    <string name="str_device_mac_address">Device Mac Address</string>
+    <string name="str_model_number">Model Number</string>
+    <string name="str_device_firmware_version">Device Firmware Version</string>
+    <string name="str_app_version">App Version</string>
+    <string name="str_device_info">Device Information</string>
+    <string name="str_char_v">V</string>
+    <string name="str_digits_letters">ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890</string>
 
 
 </resources>

@@ -67,7 +67,7 @@ public class ChangeConfigurationActivity extends Activity implements View.OnClic
     /**
      * Button reference object
      */
-    private Button mCancel_Button, mSend_Button, btnClearData, btnResetDevice, btnSave;
+    private Button mCancel_Button, mSend_Button, btnClearData, btnResetDevice, btnSave, btnResetPharmaMode;
     /**
      * Byte data that needs to be written on failure
      */
@@ -92,7 +92,8 @@ public class ChangeConfigurationActivity extends Activity implements View.OnClic
      * Boolean reference object for handling the on/off of power button
      */
     private boolean boolISTurnedOff = true, boolIsClearDataCommandSend = false, boolIsResetDeviceCommandSend = false,
-            boolIsUserNoteSend = false, boolIsUserNoteSendRequestGenerated = false, boolIsUserNoteRetrieveCommandSend = false;
+            boolIsUserNoteSend = false, boolIsUserNoteSendRequestGenerated = false,
+            boolIsUserNoteRetrieveCommandSend = false, boolIsCommandForResettingPharmaModeSend = false;
     /**
      * LinearLayout reference object
      */
@@ -106,6 +107,7 @@ public class ChangeConfigurationActivity extends Activity implements View.OnClic
         initView();
         manageHeaderView();
         retrieveLastConfiguration();
+        retrieveUserCommentForDevice();
     }
 
     /**
@@ -148,7 +150,7 @@ public class ChangeConfigurationActivity extends Activity implements View.OnClic
         if (mActivity != null) {
             AppApplication.getInstance().setCurrentActivityReference(mActivity);
         }
-        retrieveUserCommentForDevice();
+
         setUpListener();
         manageBluetoothConnectionSetupListener();
 
@@ -263,6 +265,7 @@ public class ChangeConfigurationActivity extends Activity implements View.OnClic
                         if (boolIsUserNoteRetrieveCommandSend) {
                             mUserNoteEdittext.setText(normalString);
                             boolIsUserNoteRetrieveCommandSend = false;
+                            GlobalConstant.myCountDownTimer.cancel();
                             enableDisableNotification(false);
                         }
                     } catch (Exception e) {
@@ -286,6 +289,18 @@ public class ChangeConfigurationActivity extends Activity implements View.OnClic
                 } else if (boolIsUserNoteSend) {
                     AndroidAppUtils.showSnackBar(AppApplication.getInstance(), mActivity.getResources().getString(R.string.strUserNoteSaveSuccessMsg));
                     boolIsUserNoteSend = false;
+                    new Handler(Looper.getMainLooper()).postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            if (mActivity != null) {
+                                mActivity.finish();
+                            }
+                        }
+                    },2000);
+
+                } else if (boolIsCommandForResettingPharmaModeSend) {
+                    AndroidAppUtils.showSnackBar(AppApplication.getInstance(), mActivity.getResources().getString(R.string.strResetPharmaModeMsg));
+                    boolIsCommandForResettingPharmaModeSend = false;
                 } else if (boolIsUserNoteRetrieveCommandSend) {
                     enableDisableNotification(true);
                 } else {
@@ -298,24 +313,7 @@ public class ChangeConfigurationActivity extends Activity implements View.OnClic
         };
     }
 
-    /**
-     * Method Name : RemoveNonAlphaNumeric
-     * Description : This method is used for removing non alpha numeric character from string
-     *
-     * @param value
-     * @return
-     */
-    public String RemoveNonAlphaNumeric(String value) {
-        StringBuilder sb = new StringBuilder(value);
-        for (int i = 0; i < value.length(); i++) {
-            char ch[] = value.toCharArray();
 
-            if (Character.isLetterOrDigit(ch[i])) {
-                sb.append(ch);
-            }
-        }
-        return sb.toString();
-    }
 
     /**
      * Method Name : enableDisableNotification
@@ -343,6 +341,7 @@ public class ChangeConfigurationActivity extends Activity implements View.OnClic
         new Handler(Looper.getMainLooper()).postDelayed(new Runnable() {
             @Override
             public void run() {
+                GlobalConstant.myCountDownTimer.start();
                 GlobalConstant.myCountDownTimer.stringGeneratedForActionOccurred(mActivity.getResources().getString(R.string.strFailToRetrieveMag));
                 boolIsUserNoteRetrieveCommandSend = true;
                 if (ConnectionControl.dl_write_characteristics != null)
@@ -520,84 +519,6 @@ public class ChangeConfigurationActivity extends Activity implements View.OnClic
         return headerViewClickListener;
     }
 
-    /**
-     * Method Name : sendChangeConfigurationDataToDevice
-     * Description : this method is used for sending the configuration bits to device
-     */
-    private void sendChangeConfigurationDataToDevice() {
-        mAls_String = mAls_EditText.getText().toString().trim().replaceAll("[^\\d.]", "");
-        mTamper_String = mTamper_EditText.getText().toString().trim().replaceAll("[^\\d.]", "");
-        mPharmaModeDelay_String = mPharmaModeDelayValue_EditText.getText().toString().trim().replaceAll("[^\\d.]", "");
-        AndroidAppUtils.showLog(TAG, "(mChannel_37_Spinner.getSelectedItem() : " + mChannel_37_Spinner.getItemAtPosition(mChannel_37_Spinner.getSelectedItemPosition()) +
-                "\nmChannel_38_Spinner.getSelectedItem() " + mChannel_38_Spinner.getItemAtPosition(mChannel_38_Spinner.getSelectedItemPosition()) +
-                "\nmChannel_39_Spinner.getSelectedItem() : " + mChannel_39_Spinner.getItemAtPosition(mChannel_39_Spinner.getSelectedItemPosition()) +
-                "\n mPharmaModeDelay_String : " + mPharmaModeDelay_String);
-        channel_37_Int = spinnerValueChange(mChannel_37_Spinner.getItemAtPosition(mChannel_37_Spinner.getSelectedItemPosition()).toString().trim());
-        channel_38_Int = spinnerValueChange(mChannel_38_Spinner.getItemAtPosition(mChannel_38_Spinner.getSelectedItemPosition()).toString().trim());
-        channel_39_Int = spinnerValueChange(mChannel_39_Spinner.getItemAtPosition(mChannel_39_Spinner.getSelectedItemPosition()).toString().trim());
-        mPharmaMode_String = spinnerPharmaModeValueChange(mPharmaModeSpinner.getItemAtPosition(mPharmaModeSpinner.getSelectedItemPosition()).toString().trim());
-        if (mLogin_Interval_Spinner.getSelectedItem().toString().trim().equalsIgnoreCase(mActivity.getResources().getString(R.string.strDisableCaption))) {
-            mLogin_Interval_Int = AppHelper.NUMBER_ZERO;
-        } else {
-            mLogin_Interval_Int = mLogin_Interval_Spinner.getSelectedItem().toString().trim().replaceAll("[^\\d.]", "");
-        }
-        mTxPowerInt = mTx_power_spinner.getSelectedItem().toString().trim().replaceAll("[^\\d.]", "");
-        mPrfTimeOut = mPrf_timeout_spinner.getSelectedItem().toString().trim().replaceAll("[^\\d.]", "");
-        byte[] mBytePharmaModeValue = verifyPharmaModeDelayData(AndroidAppUtils.convertInHex(mPharmaModeDelay_String.isEmpty() ? AppHelper.NUMBER_ZERO : mPharmaModeDelay_String));
-        String mData = mPrfTimeOut + mTxPowerInt +
-               /* mAls_String + */mTamper_String +
-                channel_37_Int + channel_38_Int
-                + channel_39_Int + mLogin_Interval_Int + mPharmaMode_String;
-        /**
-         * Given arbitrary file id and record id for turning off the device
-         */
-        String strFileId = AppHelper.DOUBLE_ZERO + AppHelper.ZERO_FIVE;
-        String strRecordId = AppHelper.DOUBLE_ZERO + AppHelper.ZERO_ONE;
-        byte[] etByteFileID = AndroidAppUtils.verifyForMoreThanTwoDigit(strFileId.isEmpty() ? AppHelper.DOUBLE_ZERO + AppHelper.ZERO_FIVE : AndroidAppUtils.appendNoOfZeroIfRequired(strFileId));
-        byte[] etByteRecordID = AndroidAppUtils.verifyForMoreThanTwoDigit(strRecordId.isEmpty() ? AppHelper.DOUBLE_ZERO + AppHelper.ZERO_ONE : AndroidAppUtils.appendNoOfZeroIfRequired(strRecordId));
-
-        byte[] dataToWritten = {(byte) 0x00,
-                (byte) 0x00,
-//                (byte) (Integer.parseInt(mAls_String.isEmpty() ? "20" : AndroidAppUtils.appendNoOfZeroIfRequired(mAls_String)) & 0xFF),
-                (byte) (Integer.parseInt(mTamper_String.isEmpty() ? "20" : AndroidAppUtils.appendNoOfZeroIfRequired(mTamper_String)) & 0xFF),
-                (byte) (Integer.parseInt(channel_37_Int.isEmpty() ? AppHelper.DOUBLE_ZERO : AndroidAppUtils.appendNoOfZeroIfRequired(channel_37_Int)) & 0xFF),
-                (byte) (Integer.parseInt(channel_38_Int.isEmpty() ? AppHelper.DOUBLE_ZERO : AndroidAppUtils.appendNoOfZeroIfRequired(channel_38_Int)) & 0xFF),
-                (byte) (Integer.parseInt(channel_39_Int.isEmpty() ? AppHelper.DOUBLE_ZERO : AndroidAppUtils.appendNoOfZeroIfRequired(channel_39_Int)) & 0xFF),
-                etByteFileID[0],
-                etByteFileID[1],
-                etByteRecordID[0],
-                etByteRecordID[1],
-                (byte) (Integer.parseInt(mLogin_Interval_Int.isEmpty() ? "15" : AndroidAppUtils.appendNoOfZeroIfRequired(mLogin_Interval_Int)) & 0xFF),
-                (byte) (Integer.parseInt(strTurnOff.isEmpty() ? AppHelper.ZERO_TWO : AndroidAppUtils.appendNoOfZeroIfRequired(strTurnOff)) & 0xFF),
-                mBytePharmaModeValue[0],
-                mBytePharmaModeValue[1],
-                (byte) (Integer.parseInt(mPharmaMode_String.isEmpty() ? AppHelper.DOUBLE_ZERO : AndroidAppUtils.appendNoOfZeroIfRequired(mPharmaMode_String)) & 0xFF),
-                (byte) (Integer.parseInt(mPrfTimeOut.isEmpty() ? "0a" : AndroidAppUtils.appendNoOfZeroIfRequired(mPrfTimeOut)) & 0xFF),
-                (byte) (Integer.parseInt(mTxPowerInt.isEmpty() ? AppHelper.ZERO_FOUR : AndroidAppUtils.appendNoOfZeroIfRequired(mTxPowerInt)) & 0xFF)
-        };
-        mByteDataNeedToWritten = dataToWritten;
-        AndroidAppUtils.showLog(TAG, "DATA ENTERED : " + mData + "   ****** dataToWritten : " + dataToWritten +
-                "Hex data : " + AndroidAppUtils.convertToHexString(dataToWritten));
-        mTamper_EditText.clearFocus();
-        GlobalConstant.IS_NEED_TO_SHOW_DISCONNECT_MESSAGE = false;
-        if (GlobalConstant.CONNECTED_STATE) {
-            AndroidAppUtils.showProgressDialog(mActivity, mActivity.getResources().getString(R.string.strChangingConfigurationLoading), false);
-            if (ConnectionControl.dl_write_characteristics != null) {
-                boolIsUserNoteRetrieveCommandSend = false;
-
-                DeviceAdapter.mConnectionControl.writeFirstByteToDevice(ConnectionControl.dl_write_characteristics, dataToWritten, mActivity);
-            } else {
-                AndroidAppUtils.showErrorLog(TAG, "ConnectionControl.dl_write_characteristics is null");
-            }
-        } else {
-            AndroidAppUtils.showLog(TAG, "Need to connect to device");
-            BluetoothDevice bluetoothDevice = GlobalConstant.mBluetoothAdapter != null ? GlobalConstant.mBluetoothAdapter.getRemoteDevice(GlobalConstant.DEVICE_MAC) : null;
-            AndroidAppUtils.hideProgressDialog();
-            DeviceAdapter.mConnectionControl = new ConnectionControl(ConnectionControl.connectionControl.mActivity, bluetoothDevice, mActivity);
-        }
-
-
-    }
 
     /**
      * Method Name : verifyPharmaModeDelayData
@@ -690,17 +611,20 @@ public class ChangeConfigurationActivity extends Activity implements View.OnClic
         mSend_Button = (Button) findViewById(R.id.send_button);
         btnClearData = (Button) findViewById(R.id.btnClearData);
         btnResetDevice = (Button) findViewById(R.id.btnResetDevice);
+        btnResetPharmaMode = (Button) findViewById(R.id.reset_pharma_button);
         btnSave = (Button) findViewById(R.id.btnSave);
         btnClearData.setOnClickListener(this);
         mSend_Button.setOnClickListener(this);
         btnResetDevice.setOnClickListener(this);
         btnSave.setOnClickListener(this);
+        btnResetPharmaMode.setOnClickListener(this);
         /**
          * B4 Pharma Mode Fields
          */
         lLPharmaModeLayout = (LinearLayout) findViewById(R.id.lLPharmaModeLayout);
         mPharmaModeDelayValue_EditText = (EditText) findViewById(R.id.mPharmaModeDelayValue);
         mPharmaModeSpinner = (Spinner) findViewById(R.id.mPharmaModeSpinner);
+        mPharmaModeSpinner.setSelection(1);
         if (GlobalConstant.STRING_CURRENT_BEACON_TYPE_CONNECTED.equalsIgnoreCase(GlobalKeys.BEACON_TYPE_B4_CONNECTED)) {
             lLPharmaModeLayout.setVisibility(View.VISIBLE);
         } else {
@@ -748,6 +672,9 @@ public class ChangeConfigurationActivity extends Activity implements View.OnClic
 //                sendCommandForSavingUserNote(AppHelper.STRING_INITIATE_USER_DATA_TRANSFER);
                 AndroidAppUtils.hideKeyboard(mActivity, btnSave);
                 sendCommandForSavingUserNote(AppHelper.STRING_SEND_USER_DATA_TRANSFER);
+                break;
+            case R.id.reset_pharma_button:
+                sendResetPharmaCommand();
                 break;
         }
     }
@@ -844,6 +771,84 @@ public class ChangeConfigurationActivity extends Activity implements View.OnClic
     }
 
     /**
+     * Method Name : sendChangeConfigurationDataToDevice
+     * Description : this method is used for sending the configuration bits to device
+     */
+    private void sendChangeConfigurationDataToDevice() {
+        mAls_String = mAls_EditText.getText().toString().trim().replaceAll("[^\\d.]", "");
+        mTamper_String = mTamper_EditText.getText().toString().trim().replaceAll("[^\\d.]", "");
+        mPharmaModeDelay_String = mPharmaModeDelayValue_EditText.getText().toString().trim().replaceAll("[^\\d.]", "");
+        AndroidAppUtils.showLog(TAG, "(mChannel_37_Spinner.getSelectedItem() : " + mChannel_37_Spinner.getItemAtPosition(mChannel_37_Spinner.getSelectedItemPosition()) +
+                "\nmChannel_38_Spinner.getSelectedItem() " + mChannel_38_Spinner.getItemAtPosition(mChannel_38_Spinner.getSelectedItemPosition()) +
+                "\nmChannel_39_Spinner.getSelectedItem() : " + mChannel_39_Spinner.getItemAtPosition(mChannel_39_Spinner.getSelectedItemPosition()) +
+                "\n mPharmaModeDelay_String : " + mPharmaModeDelay_String);
+        channel_37_Int = spinnerValueChange(mChannel_37_Spinner.getItemAtPosition(mChannel_37_Spinner.getSelectedItemPosition()).toString().trim());
+        channel_38_Int = spinnerValueChange(mChannel_38_Spinner.getItemAtPosition(mChannel_38_Spinner.getSelectedItemPosition()).toString().trim());
+        channel_39_Int = spinnerValueChange(mChannel_39_Spinner.getItemAtPosition(mChannel_39_Spinner.getSelectedItemPosition()).toString().trim());
+        mPharmaMode_String = spinnerPharmaModeValueChange(mPharmaModeSpinner.getItemAtPosition(mPharmaModeSpinner.getSelectedItemPosition()).toString().trim());
+        if (mLogin_Interval_Spinner.getSelectedItem().toString().trim().equalsIgnoreCase(mActivity.getResources().getString(R.string.strDisableCaption))) {
+            mLogin_Interval_Int = AppHelper.NUMBER_ZERO;
+        } else {
+            mLogin_Interval_Int = mLogin_Interval_Spinner.getSelectedItem().toString().trim().replaceAll("[^\\d.]", "");
+        }
+        mTxPowerInt = mTx_power_spinner.getSelectedItem().toString().trim().replaceAll("[^\\d.]", "");
+        mPrfTimeOut = mPrf_timeout_spinner.getSelectedItem().toString().trim().replaceAll("[^\\d.]", "");
+        byte[] mBytePharmaModeValue = verifyPharmaModeDelayData(AndroidAppUtils.convertInHex(mPharmaModeDelay_String.isEmpty() ? AppHelper.NUMBER_ZERO : mPharmaModeDelay_String));
+        String mData = mPrfTimeOut + mTxPowerInt +
+               /* mAls_String + */mTamper_String +
+                channel_37_Int + channel_38_Int
+                + channel_39_Int + mLogin_Interval_Int + mPharmaMode_String;
+        /**
+         * Given arbitrary file id and record id for turning off the device
+         */
+        String strFileId = AppHelper.DOUBLE_ZERO + AppHelper.ZERO_FIVE;
+        String strRecordId = AppHelper.DOUBLE_ZERO + AppHelper.ZERO_ONE;
+        byte[] etByteFileID = AndroidAppUtils.verifyForMoreThanTwoDigit(strFileId.isEmpty() ? AppHelper.DOUBLE_ZERO + AppHelper.ZERO_FIVE : AndroidAppUtils.appendNoOfZeroIfRequired(strFileId));
+        byte[] etByteRecordID = AndroidAppUtils.verifyForMoreThanTwoDigit(strRecordId.isEmpty() ? AppHelper.DOUBLE_ZERO + AppHelper.ZERO_ONE : AndroidAppUtils.appendNoOfZeroIfRequired(strRecordId));
+
+        byte[] dataToWritten = {(byte) 0x00,
+                (byte) 0x00,
+//                (byte) (Integer.parseInt(mAls_String.isEmpty() ? "20" : AndroidAppUtils.appendNoOfZeroIfRequired(mAls_String)) & 0xFF),
+                (byte) (Integer.parseInt(mTamper_String.isEmpty() ? "20" : AndroidAppUtils.appendNoOfZeroIfRequired(mTamper_String)) & 0xFF),
+                (byte) (Integer.parseInt(channel_37_Int.isEmpty() ? AppHelper.DOUBLE_ZERO : AndroidAppUtils.appendNoOfZeroIfRequired(channel_37_Int)) & 0xFF),
+                (byte) (Integer.parseInt(channel_38_Int.isEmpty() ? AppHelper.DOUBLE_ZERO : AndroidAppUtils.appendNoOfZeroIfRequired(channel_38_Int)) & 0xFF),
+                (byte) (Integer.parseInt(channel_39_Int.isEmpty() ? AppHelper.DOUBLE_ZERO : AndroidAppUtils.appendNoOfZeroIfRequired(channel_39_Int)) & 0xFF),
+                etByteFileID[0],
+                etByteFileID[1],
+                etByteRecordID[0],
+                etByteRecordID[1],
+                (byte) (Integer.parseInt(mLogin_Interval_Int.isEmpty() ? "15" : AndroidAppUtils.appendNoOfZeroIfRequired(mLogin_Interval_Int)) & 0xFF),
+                (byte) (Integer.parseInt(strTurnOff.isEmpty() ? AppHelper.ZERO_TWO : AndroidAppUtils.appendNoOfZeroIfRequired(strTurnOff)) & 0xFF),
+                mBytePharmaModeValue[0],
+                mBytePharmaModeValue[1],
+                (byte) (Integer.parseInt(mPharmaMode_String.isEmpty() ? AppHelper.DOUBLE_ZERO : AndroidAppUtils.appendNoOfZeroIfRequired(mPharmaMode_String)) & 0xFF),
+                (byte) (Integer.parseInt(mPrfTimeOut.isEmpty() ? "0a" : AndroidAppUtils.appendNoOfZeroIfRequired(mPrfTimeOut)) & 0xFF),
+                (byte) (Integer.parseInt(mTxPowerInt.isEmpty() ? AppHelper.ZERO_FOUR : AndroidAppUtils.appendNoOfZeroIfRequired(mTxPowerInt)) & 0xFF)
+        };
+        mByteDataNeedToWritten = dataToWritten;
+        AndroidAppUtils.showLog(TAG, "DATA ENTERED : " + mData + "   ****** dataToWritten : " + dataToWritten +
+                "Hex data : " + AndroidAppUtils.convertToHexString(dataToWritten));
+        mTamper_EditText.clearFocus();
+        GlobalConstant.IS_NEED_TO_SHOW_DISCONNECT_MESSAGE = false;
+        if (GlobalConstant.CONNECTED_STATE) {
+            AndroidAppUtils.showProgressDialog(mActivity, mActivity.getResources().getString(R.string.strChangingConfigurationLoading), false);
+            if (ConnectionControl.dl_write_characteristics != null) {
+                boolIsUserNoteRetrieveCommandSend = false;
+                DeviceAdapter.mConnectionControl.writeFirstByteToDevice(ConnectionControl.dl_write_characteristics, dataToWritten, mActivity);
+            } else {
+                AndroidAppUtils.showErrorLog(TAG, "ConnectionControl.dl_write_characteristics is null");
+            }
+        } else {
+            AndroidAppUtils.showLog(TAG, "Need to connect to device");
+            BluetoothDevice bluetoothDevice = GlobalConstant.mBluetoothAdapter != null ? GlobalConstant.mBluetoothAdapter.getRemoteDevice(GlobalConstant.DEVICE_MAC) : null;
+            AndroidAppUtils.hideProgressDialog();
+            DeviceAdapter.mConnectionControl = new ConnectionControl(ConnectionControl.connectionControl.mActivity, bluetoothDevice, mActivity);
+        }
+
+
+    }
+
+    /**
      * Method Name : sendCommandForClearData
      * Description : This method is used for sending command to device for clear data as well
      * as configuration on device
@@ -885,9 +890,7 @@ public class ChangeConfigurationActivity extends Activity implements View.OnClic
             } else {
                 AndroidAppUtils.showErrorLog(TAG, "Either ConnectionControl.connectionControl or DeviceAdapter.mConnectionControl is null");
             }
-        } catch (
-                Exception e)
-
+        } catch (Exception e)
         {
             AndroidAppUtils.showInfoLog(TAG, "error message " + e.getMessage());
         }
@@ -1001,7 +1004,7 @@ public class ChangeConfigurationActivity extends Activity implements View.OnClic
                             + "\n stringLength : " + stringLength +
                             "\n intNoOfZeroRequired :  " + intNoOfZeroRequired);
                     final byte[] byteClearData = strUserNoteData.getBytes(StandardCharsets.UTF_8); /*Base64.decode(strUserNoteData, Base64.DEFAULT);*/
-                    int intNeedToCopy = stringLength - 12;
+                    int intNeedToCopy = stringLength - 11;
                     if (stringLength > 11) {
                         System.arraycopy(byteClearData, 0, byteDataToWritten, 0, 11);
                         byteDataToWritten[11] = 0x06;
@@ -1036,6 +1039,77 @@ public class ChangeConfigurationActivity extends Activity implements View.OnClic
                     }
                 }
             }
+        } catch (Exception e) {
+            AndroidAppUtils.showInfoLog(TAG, "error message " + e.getMessage());
+        }
+
+    }
+
+    /**
+     * Method Name : sendResetPharmaCommand
+     * Description : This method is used for sending command to device for saving the user notes to the device
+     * Info like mac address, name,etc
+     */
+    @RequiresApi(api = Build.VERSION_CODES.KITKAT)
+    private void sendResetPharmaCommand() {
+        try {
+            mPharmaMode_String = spinnerPharmaModeValueChange(mPharmaModeSpinner.getItemAtPosition(mPharmaModeSpinner.getSelectedItemPosition()).toString().trim());
+            if (mLogin_Interval_Spinner.getSelectedItem().toString().trim().equalsIgnoreCase(mActivity.getResources().getString(R.string.strDisableCaption))) {
+                mLogin_Interval_Int = AppHelper.NUMBER_ZERO;
+            } else {
+                mLogin_Interval_Int = mLogin_Interval_Spinner.getSelectedItem().toString().trim().replaceAll("[^\\d.]", "");
+            }
+            mTxPowerInt = mTx_power_spinner.getSelectedItem().toString().trim().replaceAll("[^\\d.]", "");
+            mPrfTimeOut = mPrf_timeout_spinner.getSelectedItem().toString().trim().replaceAll("[^\\d.]", "");
+            byte[] mBytePharmaModeValue = verifyPharmaModeDelayData(AndroidAppUtils.convertInHex(mPharmaModeDelay_String.isEmpty() ? AppHelper.NUMBER_ZERO : mPharmaModeDelay_String));
+            String mData = mPrfTimeOut + mTxPowerInt +
+               /* mAls_String + */mTamper_String +
+                    channel_37_Int + channel_38_Int
+                    + channel_39_Int + mLogin_Interval_Int + mPharmaMode_String;
+            /**
+             * Given arbitrary file id and record id for initiating transfer of user test data to the device
+             */
+            String strFileId = AppHelper.DOUBLE_ZERO + AppHelper.ZERO_FOUR;
+            String strRecordId = AppHelper.DOUBLE_ZERO + AppHelper.ZERO_ONE;
+            strTurnOff = AppHelper.ZERO_SEVEN;
+            byte[] etByteFileID = AndroidAppUtils.verifyForMoreThanTwoDigit(strFileId.isEmpty() ? AppHelper.DOUBLE_ZERO + AppHelper.ZERO_FIVE : AndroidAppUtils.appendNoOfZeroIfRequired(strFileId));
+            byte[] etByteRecordID = AndroidAppUtils.verifyForMoreThanTwoDigit(strRecordId.isEmpty() ? AppHelper.DOUBLE_ZERO + AppHelper.ZERO_ONE : AndroidAppUtils.appendNoOfZeroIfRequired(strRecordId));
+            byte[] byteDataToWritten = {(byte) 0x00,
+                    (byte) 0x00,
+//                (byte) (Integer.parseInt(mAls_String.isEmpty() ? "20" : AndroidAppUtils.appendNoOfZeroIfRequired(mAls_String)) & 0xFF),
+                    (byte) (Integer.parseInt(mTamper_String.isEmpty() ? "20" : AndroidAppUtils.appendNoOfZeroIfRequired(mTamper_String)) & 0xFF),
+                    (byte) (Integer.parseInt(channel_37_Int.isEmpty() ? AppHelper.DOUBLE_ZERO : AndroidAppUtils.appendNoOfZeroIfRequired(channel_37_Int)) & 0xFF),
+                    (byte) (Integer.parseInt(channel_38_Int.isEmpty() ? AppHelper.DOUBLE_ZERO : AndroidAppUtils.appendNoOfZeroIfRequired(channel_38_Int)) & 0xFF),
+                    (byte) (Integer.parseInt(channel_39_Int.isEmpty() ? AppHelper.DOUBLE_ZERO : AndroidAppUtils.appendNoOfZeroIfRequired(channel_39_Int)) & 0xFF),
+                    etByteFileID[0],
+                    etByteFileID[1],
+                    etByteRecordID[0],
+                    etByteRecordID[1],
+                    (byte) (Integer.parseInt(mLogin_Interval_Int.isEmpty() ? "15" : AndroidAppUtils.appendNoOfZeroIfRequired(mLogin_Interval_Int)) & 0xFF),
+                    (byte) (Integer.parseInt(strTurnOff.isEmpty() ? AppHelper.ZERO_TWO : AndroidAppUtils.appendNoOfZeroIfRequired(strTurnOff)) & 0xFF),
+                    mBytePharmaModeValue[0],
+                    mBytePharmaModeValue[1],
+                    (byte) (Integer.parseInt(mPharmaMode_String.isEmpty() ? AppHelper.DOUBLE_ZERO : AndroidAppUtils.appendNoOfZeroIfRequired(mPharmaMode_String)) & 0xFF),
+                    (byte) (Integer.parseInt(mPrfTimeOut.isEmpty() ? "0a" : AndroidAppUtils.appendNoOfZeroIfRequired(mPrfTimeOut)) & 0xFF),
+                    (byte) (Integer.parseInt(mTxPowerInt.isEmpty() ? AppHelper.ZERO_FOUR : AndroidAppUtils.appendNoOfZeroIfRequired(mTxPowerInt)) & 0xFF)
+            };
+            if (DeviceAdapter.mConnectionControl != null && ConnectionControl.connectionControl != null) {
+                AndroidAppUtils.showProgressDialog(mActivity, mActivity.getResources().getString(R.string.please_wait), false);
+                final byte[] finalByteDataToWritten = byteDataToWritten;
+                new Handler(Looper.getMainLooper()).postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        boolIsCommandForResettingPharmaModeSend = true;
+                        if (DeviceAdapter.mConnectionControl != null)
+                            DeviceAdapter.mConnectionControl.writeFileToDevice
+                                    (ConnectionControl.dl_notification_characteristics, finalByteDataToWritten);
+                    }
+                }, 1000);
+
+            } else {
+                AndroidAppUtils.showErrorLog(TAG, "Either ConnectionControl.connectionControl or DeviceAdapter.mConnectionControl is null");
+            }
+
         } catch (Exception e) {
             AndroidAppUtils.showInfoLog(TAG, "error message " + e.getMessage());
         }

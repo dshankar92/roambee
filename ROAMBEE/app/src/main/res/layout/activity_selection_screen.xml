@@ -25,7 +25,7 @@
             android:paddingLeft="@dimen/padding_20dp"
             android:paddingRight="@dimen/padding_20dp"
             android:paddingTop="@dimen/margin_5dp"
-            android:text="Upgrade"
+            android:text="@string/str_upgrade"
            />
 
         <android.support.v7.widget.AppCompatButton
@@ -41,7 +41,7 @@
             android:paddingLeft="@dimen/padding_20dp"
             android:paddingRight="@dimen/padding_20dp"
             android:paddingTop="@dimen/margin_5dp"
-            android:text="Data Logging"
+            android:text="@string/str_data_logging"
              />
         <android.support.v7.widget.AppCompatButton
             android:id="@+id/btnChangeConfiguration"
@@ -56,8 +56,23 @@
             android:paddingLeft="@dimen/padding_20dp"
             android:paddingRight="@dimen/padding_20dp"
             android:paddingTop="@dimen/margin_5dp"
-            android:text="Change Configuration"
+            android:text="@string/str_change_configuration"
              />
+        <android.support.v7.widget.AppCompatButton
+            android:id="@+id/btnDeviceInformation"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/btnChangeConfiguration"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="@dimen/margin_top_30dp"
+            style="@style/TextView_size_20sp"
+            android:background="@drawable/button_effect"
+            android:paddingBottom="@dimen/margin_5dp"
+            android:paddingLeft="@dimen/padding_20dp"
+            android:paddingRight="@dimen/padding_20dp"
+            android:paddingTop="@dimen/margin_5dp"
+            android:text="@string/str_device_information"
+            />
     </RelativeLayout>
 
 
